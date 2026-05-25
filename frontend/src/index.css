@@ -1,0 +1,203 @@
+@import "tailwindcss";
+
+/* ======================================================
+ATTENDANCE CALENDAR
+====================================================== */
+
+.react-calendar {
+
+  width: 100% !important;
+
+  background: transparent !important;
+
+  border: none !important;
+
+  color: white !important;
+}
+
+.react-calendar__tile {
+
+  border-radius: 14px;
+
+  padding: 14px 0;
+
+  transition: 0.2s;
+}
+
+.react-calendar__tile:hover {
+
+  background: rgba(255,255,255,0.1) !important;
+}
+
+.attendance-present {
+
+  background: rgba(34,197,94,0.25) !important;
+}
+
+.attendance-absent {
+
+  background: rgba(239,68,68,0.25) !important;
+}
+
+.attendance-late {
+
+  background: rgba(234,179,8,0.25) !important;
+}
+
+.attendance-halfday {
+
+  background: rgba(168,85,247,0.25) !important;
+}
+
+.attendance-holiday {
+
+  background: rgba(100,116,139,0.35) !important;
+}
+
+/* ======================================================
+   HOLIDAY CALENDAR
+====================================================== */
+
+.react-calendar {
+
+  width: 100%;
+
+  background: transparent;
+
+  border: none !important;
+
+  color: white;
+
+  font-family: inherit;
+}
+
+.react-calendar__navigation {
+
+  margin-bottom: 20px;
+}
+
+.react-calendar__navigation button {
+
+  color: white !important;
+
+  background: rgba(255,255,255,0.05) !important;
+
+  border: 1px solid rgba(255,255,255,0.08) !important;
+
+  border-radius: 14px !important;
+
+  min-width: 50px !important;
+
+  font-size: 16px !important;
+
+  font-weight: 700 !important;
+}
+
+.react-calendar__navigation button:hover {
+
+  background: rgba(255,255,255,0.1) !important;
+}
+
+.react-calendar__month-view__weekdays {
+
+  text-transform: uppercase;
+
+  font-size: 12px;
+
+  color: #94A3B8;
+
+  margin-bottom: 10px;
+}
+
+.react-calendar__month-view__days__day {
+
+  height: 70px;
+
+  border-radius: 18px;
+
+  color: white !important;
+
+  font-weight: 600;
+}
+
+.react-calendar__tile {
+
+  background: transparent !important;
+
+  transition: all 0.2s ease;
+}
+
+.react-calendar__tile:hover {
+
+  background: rgba(255,255,255,0.08) !important;
+}
+
+.react-calendar__tile--now {
+
+  background: rgba(59,130,246,0.25) !important;
+
+  color: #38BDF8 !important;
+}
+
+.react-calendar__tile--active {
+
+  background: linear-gradient(
+    to right,
+    #2563EB,
+    #06B6D4
+  ) !important;
+
+  color: white !important;
+}
+
+/* ======================================================
+   HOLIDAY PAGE FIX
+====================================================== */
+
+.holiday-calendar {
+
+  min-width: 1100px;
+}
+
+/* SCROLLBAR */
+
+.holiday-calendar::-webkit-scrollbar {
+
+  height: 8px;
+}
+
+.holiday-calendar::-webkit-scrollbar-thumb {
+
+  background: rgba(255,255,255,0.2);
+
+  border-radius: 20px;
+}
+
+@keyframes slideIn {
+
+  from {
+
+    opacity: 0;
+
+    transform:
+      translateX(100px);
+  }
+
+  to {
+
+    opacity: 1;
+
+    transform:
+      translateX(0);
+  }
+}
+
+body {
+
+  overflow-x: hidden;
+}
+
+#root {
+
+  overflow-x: hidden;
+}
