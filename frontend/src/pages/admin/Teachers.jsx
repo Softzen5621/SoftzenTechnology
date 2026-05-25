@@ -151,7 +151,7 @@ const Teachers = () => {
 
         await axios.post(
 
-          "http://localhost:5000/api/teachers/import",
+          `${import.meta.env.VITE_API_URL}/teachers/import`,
 
           formData,
 

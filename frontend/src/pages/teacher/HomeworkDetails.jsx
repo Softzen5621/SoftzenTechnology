@@ -144,7 +144,7 @@ const [
           const res =
             await axios.get(
 
-              `http://localhost:5000/api/homeworks/${id}`,
+              `${import.meta.env.VITE_API_URL}/homeworks/${id}`,
 
               {
 
@@ -193,7 +193,7 @@ setSubmittedUsers(
           const res =
             await axios.get(
 
-              `http://localhost:5000/api/homeworks/${id}/submissions`,
+              `${import.meta.env.VITE_API_URL}/homeworks/${id}/submissions`,
 
               {
 
@@ -224,7 +224,7 @@ setSubmittedUsers(
           const res =
             await axios.get(
 
-              `http://localhost:5000/api/homeworks/${id}/questions`,
+              `${import.meta.env.VITE_API_URL}/homeworks/${id}/questions`,
 
               {
 
@@ -276,7 +276,7 @@ setSubmittedUsers(
 
           await axios.put(
 
-            `http://localhost:5000/api/homeworks/questions/${questionId}`,
+            `${import.meta.env.VITE_API_URL}/homeworks/questions/${questionId}`,
 
             {
 
@@ -463,7 +463,7 @@ const saveReview =
 
 await axios.put(
 
-  "http://localhost:5000/api/homeworks/review-submission",
+  `${import.meta.env.VITE_API_URL}/homeworks/review-submission`,
 
   {
 

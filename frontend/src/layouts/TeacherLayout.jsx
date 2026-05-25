@@ -117,7 +117,7 @@ export default function TeacherLayout() {
         const res =
           await axios.get(
 
-            "http://localhost:5000/api/notifications",
+            `${import.meta.env.VITE_API_URL}/notifications`,
 
             axiosConfig
           );
@@ -170,7 +170,7 @@ export default function TeacherLayout() {
     const socket =
       io(
 
-        "http://localhost:5000",
+        import.meta.env.VITE_API_URL.replace("/api", ""),
 
         {
 
@@ -321,7 +321,7 @@ export default function TeacherLayout() {
 
         await axios.put(
 
-          `http://localhost:5000/api/notifications/acknowledge/${id}`,
+          `${import.meta.env.VITE_API_URL}/notifications/acknowledge/${id}`,
 
           {},
 
@@ -372,7 +372,7 @@ export default function TeacherLayout() {
 
         await axios.put(
 
-          `http://localhost:5000/api/notifications/read/${id}`,
+          `${import.meta.env.VITE_API_URL}/notifications/read/${id}`,
 
           {},
 
@@ -417,7 +417,7 @@ export default function TeacherLayout() {
 
         await axios.put(
 
-          "http://localhost:5000/api/notifications/read-all",
+          `${import.meta.env.VITE_API_URL}/notifications/read-all`,
 
           {},
 
@@ -458,7 +458,7 @@ export default function TeacherLayout() {
 
         await axios.delete(
 
-          "http://localhost:5000/api/notifications/clear-all",
+          `${import.meta.env.VITE_API_URL}/notifications/clear-all`,
 
           axiosConfig
         );

@@ -120,7 +120,7 @@ const ParentHomework = () => {
         const res =
           await axios.get(
 
-            "http://localhost:5000/api/parent-homework/homeworks",
+            `${import.meta.env.VITE_API_URL}/parent-homework/homeworks`,
 
             axiosConfig
           );
@@ -366,7 +366,7 @@ if (
 
         await axios.post(
 
-          `http://localhost:5000/api/parent-homework/view/${homeworkId}`,
+          `${import.meta.env.VITE_API_URL}/parent-homework/view/${homeworkId}`,
 
           {
 
@@ -463,7 +463,7 @@ if (
 
         await axios.post(
 
-          `http://localhost:5000/api/parent-homework/acknowledge/${homeworkId}`,
+          `${import.meta.env.VITE_API_URL}/parent-homework/acknowledge/${homeworkId}`,
 
           {
 
@@ -539,7 +539,7 @@ const submitHomework =
 
       await axios.post(
 
-        `http://localhost:5000/api/parent-homework/submit/${homeworkId}`,
+        `${import.meta.env.VITE_API_URL}/parent-homework/submit/${homeworkId}`,
 
         {
 
@@ -601,7 +601,7 @@ const submitHomework =
         const res =
           await axios.get(
 
-            `http://localhost:5000/api/parent-homework/faq/${homeworkId}`,
+            `${import.meta.env.VITE_API_URL}/parent-homework/faq/${homeworkId}`,
 
             axiosConfig
           );
@@ -670,7 +670,7 @@ const submitHomework =
 
         await axios.post(
 
-          "http://localhost:5000/api/parent-homework/questions",
+          `${import.meta.env.VITE_API_URL}/parent-homework/questions`,
 
           {
 

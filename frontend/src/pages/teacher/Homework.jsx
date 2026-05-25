@@ -168,7 +168,7 @@ const Homework =
           const res =
             await axios.get(
 
-              "http://localhost:5000/api/homeworks/teacher",
+              `${import.meta.env.VITE_API_URL}/homeworks/teacher`,
 
               {
 
@@ -257,7 +257,7 @@ const Homework =
           const res =
             await axios.get(
 
-              "http://localhost:5000/api/subjects",
+              `${import.meta.env.VITE_API_URL}/subjects`,
 
               {
 
@@ -287,7 +287,7 @@ const Homework =
           const res =
             await axios.get(
 
-              "http://localhost:5000/api/teachers/my-classes",
+              `${import.meta.env.VITE_API_URL}/teachers/my-classes`,
 
               {
 
@@ -317,7 +317,7 @@ const Homework =
           const res =
             await axios.get(
 
-              "http://localhost:5000/api/students",
+              `${import.meta.env.VITE_API_URL}/students`,
 
               {
 
@@ -505,7 +505,7 @@ const Homework =
 
           await axios.post(
 
-            "http://localhost:5000/api/homeworks",
+            `${import.meta.env.VITE_API_URL}/homeworks`,
 
             payload,
 
@@ -589,7 +589,7 @@ const Homework =
 
           await axios.delete(
 
-            `http://localhost:5000/api/homeworks/${id}`,
+            `${import.meta.env.VITE_API_URL}/homeworks/${id}`,
 
             {
 

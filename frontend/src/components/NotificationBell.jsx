@@ -69,7 +69,7 @@ const NotificationBell =
           const res =
             await axios.get(
 
-              "http://localhost:5000/api/notifications",
+              `${import.meta.env.VITE_API_URL}/notifications`,
 
               {
 
@@ -236,7 +236,7 @@ const NotificationBell =
 
           await axios.put(
 
-            `http://localhost:5000/api/notifications/read/${id}`,
+            `${import.meta.env.VITE_API_URL}/notifications/read/${id}`,
 
             {},
 
@@ -273,7 +273,7 @@ const NotificationBell =
 
           await axios.put(
 
-            "http://localhost:5000/api/notifications/read-all",
+            `${import.meta.env.VITE_API_URL}/notifications/read-all`,
 
             {},
 

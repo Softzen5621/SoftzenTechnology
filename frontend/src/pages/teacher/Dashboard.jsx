@@ -48,7 +48,7 @@ export default function Dashboard() {
         const res =
           await axios.get(
 
-            "http://localhost:5000/api/teachers/dashboard",
+            `${import.meta.env.VITE_API_URL}/teachers/dashboard`,
 
             {
 

@@ -169,7 +169,7 @@ const handleSendOtp =
 
      await axios.post(
 
-  `http://localhost:5000/api/auth/${selectedRole}-forgot-password`,
+  `${import.meta.env.VITE_API_URL}/auth/${selectedRole}-forgot-password`,
         {
 
           email:
@@ -218,7 +218,7 @@ const handleResetPassword =
 
       await axios.post(
 
-        `http://localhost:5000/api/auth/${selectedRole}-reset-password`,
+        `${import.meta.env.VITE_API_URL}/auth/${selectedRole}-reset-password`,
 
         {
 
@@ -305,7 +305,7 @@ const handleLogin =
         res =
           await axios.post(
 
-            "http://localhost:5000/api/auth/login",
+            `${import.meta.env.VITE_API_URL}/auth/login`,
 
             {
 
@@ -332,7 +332,7 @@ const handleLogin =
         res =
           await axios.post(
 
-           "http://localhost:5000/api/auth/teacher-login",
+           `${import.meta.env.VITE_API_URL}/auth/teacher-login`,
 
             {
 
@@ -359,7 +359,7 @@ const handleLogin =
         res =
           await axios.post(
 
-            "http://localhost:5000/api/auth/parent-login",
+            `${import.meta.env.VITE_API_URL}/auth/parent-login`,
 
             {
 

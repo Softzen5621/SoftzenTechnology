@@ -42,7 +42,7 @@ export default function NotificationToast() {
     const socket =
       io(
 
-        "http://localhost:5000",
+        import.meta.env.VITE_API_URL.replace("/api", ""),
 
         {
 

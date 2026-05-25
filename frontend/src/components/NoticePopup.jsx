@@ -375,7 +375,7 @@ const NoticePopup = () => {
             notice.attachment && (
 
               <a
-                href={`http://localhost:5000/${notice.attachment}`}
+                href={`${import.meta.env.VITE_API_URL.replace("/api", "")}/${notice.attachment}`}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-block mt-5 text-blue-600 font-semibold"
