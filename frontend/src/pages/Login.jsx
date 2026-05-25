@@ -3,7 +3,8 @@ import {
   useState
 } from "react";
 
-import axios from "axios";
+import API from "../services/api";
+import.meta.env.VITE_API_URL
 
 import socket
 from "../services/socket";
@@ -167,9 +168,8 @@ const handleSendOtp =
 
       setSuccess("");
 
-     await axios.post(
-
-  `${import.meta.env.VITE_API_URL}/auth/${selectedRole}-forgot-password`,
+    await API.post(
+  `/auth/${selectedRole}-forgot-password`,
         {
 
           email:
@@ -216,9 +216,8 @@ const handleResetPassword =
 
       setSuccess("");
 
-      await axios.post(
-
-        `${import.meta.env.VITE_API_URL}/auth/${selectedRole}-reset-password`,
+      await API.post(
+  `/auth/${selectedRole}-reset-password`,
 
         {
 
@@ -303,9 +302,8 @@ const handleLogin =
       ) {
 
         res =
-          await axios.post(
-
-            `${import.meta.env.VITE_API_URL}/auth/login`,
+         await API.post(
+  "/auth/login",
 
             {
 
@@ -330,9 +328,8 @@ const handleLogin =
       ) {
 
         res =
-          await axios.post(
-
-           `${import.meta.env.VITE_API_URL}/auth/teacher-login`,
+          await API.post(
+  "/auth/teacher-login",
 
             {
 
@@ -357,9 +354,8 @@ const handleLogin =
       ) {
 
         res =
-          await axios.post(
-
-            `${import.meta.env.VITE_API_URL}/auth/parent-login`,
+          await API.post(
+  "/auth/parent-login",
 
             {
 
