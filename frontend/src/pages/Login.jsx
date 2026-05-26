@@ -303,7 +303,7 @@ const handleLogin =
 
         res =
          await API.post(
-  "api/auth/login",
+  `api/auth/login`,
 
             {
 
@@ -329,7 +329,7 @@ const handleLogin =
 
         res =
           await API.post(
-  "api/auth/teacher-login",
+  `api/auth/teacher-login`,
 
             {
 
@@ -355,7 +355,7 @@ const handleLogin =
 
         res =
           await API.post(
-  "api/auth/parent-login",
+  `api/auth/parent-login`,
 
             {
 
