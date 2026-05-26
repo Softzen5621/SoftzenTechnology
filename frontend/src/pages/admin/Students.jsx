@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import "./Students.css";
+import "./students.css";
 
 import API from "../../services/api";
 
