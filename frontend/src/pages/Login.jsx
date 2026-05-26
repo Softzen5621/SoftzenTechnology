@@ -217,7 +217,7 @@ const handleResetPassword =
       setSuccess("");
 
       await API.post(
-  `/auth/${selectedRole}-reset-password`,
+  `api/auth/${selectedRole}-reset-password`,
 
         {
 
