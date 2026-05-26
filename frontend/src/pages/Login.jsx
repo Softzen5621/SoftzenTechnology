@@ -169,7 +169,7 @@ const handleSendOtp =
       setSuccess("");
 
     await API.post(
-  `api/auth/${selectedRole}-forgot-password`,
+  `/auth/${selectedRole}-forgot-password`,
         {
 
           email:
@@ -217,7 +217,7 @@ const handleResetPassword =
       setSuccess("");
 
       await API.post(
-  `api/auth/${selectedRole}-reset-password`,
+  `/auth/${selectedRole}-reset-password`,
 
         {
 
@@ -303,7 +303,7 @@ const handleLogin =
 
         res =
          await API.post(
-  `api/auth/login`,
+  `/auth/login`,
 
             {
 
@@ -329,7 +329,7 @@ const handleLogin =
 
         res =
           await API.post(
-  `api/auth/teacher-login`,
+  `/auth/teacher-login`,
 
             {
 
@@ -355,7 +355,7 @@ const handleLogin =
 
         res =
           await API.post(
-  `api/auth/parent-login`,
+  `/auth/parent-login`,
 
             {
 

@@ -75,7 +75,7 @@ export default function StudentAttendanceModal({
         const res =
           await API.get(
 
-            `/attendance/monthly?studentId=${student._id}&month=${month}&year=${year}`
+            `api/attendance/monthly?studentId=${student._id}&month=${month}&year=${year}`
           );
 
         // HOLIDAYS
