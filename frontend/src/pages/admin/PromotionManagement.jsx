@@ -3,7 +3,7 @@ import { useState } from "react";
 import {
   previewPromotion,
   promoteSchool
-} from "../../services/promotionService";
+} from "../../services/PromotionService";
 
 export default function PromotionManagement() {
 
