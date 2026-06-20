@@ -99,11 +99,66 @@ const parentHomeworkRoutes =
     "./routes/parentHomeworkRoutes"
   );
 
+  const settingsRoutes =
+require("./routes/settingsRoutes");
+
 const notificationRoutes =
   require(
     "./routes/notificationRoutes"
   );
 
+  const paymentRoutes =
+require(
+
+  "./modules/fees/routes/paymentRoutes"
+);
+
+const parentFeesRoutes =
+require(
+
+  "./modules/fees/routes/parentFeesRoutes"
+);
+
+const adminFinanceRoutes =
+require(
+
+  "./modules/fees/routes/adminFinanceRoutes"
+);
+
+const feeStructureRoutes =
+require(
+
+  "./modules/fees/routes/feeStructureRoutes"
+);
+
+const studentFinanceRoutes =
+require(
+
+  "./modules/fees/routes/studentFinanceRoutes"
+);
+
+const collectionReportRoutes =
+require(
+
+  "./modules/fees/routes/collectionReportRoutes"
+);
+
+const academicYearRoutes =
+require(
+
+  "./modules/academics/routes/academicYearRoutes"
+);
+
+const transferCertificateRoutes =
+require(
+"./modules/certificates/routes/transferCertificateRoutes"
+);
+
+const promotionRoutes =
+require(
+
+"./modules/academics/routes/promotionRoutes"
+);
 // ======================================================
 // CONNECT DATABASE
 // ======================================================
@@ -176,6 +231,15 @@ socket.on(
 // ======================================================
 // MIDDLEWARES
 // ======================================================
+app.use(
+
+  "/api/payments/webhook/razorpay",
+
+  require(
+
+    "./modules/fees/routes/paymentRoutes"
+  )
+);
 
 app.use(cors());
 
@@ -194,22 +258,12 @@ app.use(express.urlencoded({
 // ======================================================
 // STATIC FILES
 // ======================================================
-
 app.use(
-
   "/uploads",
-
   express.static(
-
-    path.join(
-
-      __dirname,
-
-      "uploads"
-    )
+    path.join(__dirname, "../uploads")
   )
 );
-
 // ======================================================
 // API ROUTES
 // ======================================================
@@ -331,20 +385,58 @@ app.use(
 
 // FEES
 
-app.use(
-
-  "/api/fees",
-
-  require("./routes/feeRoutes")
-);
-
 // FEE PAYMENTS
 
 app.use(
 
-  "/api/fee-payments",
+  "/api/collection-reports",
 
-  require("./routes/feePaymentRoutes")
+  collectionReportRoutes
+);
+
+app.use(
+
+  "/api/transfer-certificates",
+
+  transferCertificateRoutes
+);
+
+app.use(
+
+  "/api/academic-years",
+
+  academicYearRoutes
+);
+
+app.use(
+
+"/api/promotions",
+
+promotionRoutes
+);
+
+
+app.use(
+  "/api/settings",
+  settingsRoutes
+);
+
+
+
+app.use(
+
+  "/api/student-finance",
+
+  studentFinanceRoutes
+);
+
+
+
+app.use(
+
+  "/api/admin-finance",
+
+  adminFinanceRoutes
 );
 
 // ACTIVITY LOGS
@@ -357,6 +449,28 @@ app.use(
     "./routes/activityLogRoutes"
   )
 );
+
+app.use(
+
+  "/api/payments",
+
+  paymentRoutes
+);
+
+app.use(
+
+  "/api/parent-fees",
+
+  parentFeesRoutes
+);
+
+app.use(
+
+  "/api/fee-structures",
+
+  feeStructureRoutes
+);
+
 
 // ======================================================
 // HOME ROUTE

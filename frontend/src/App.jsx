@@ -14,6 +14,7 @@ from "./pages/Login";
 import ChangePassword
 from "./pages/teacher/ChangePassword";
 
+
 // ======================================================
 // ROUTE PROTECTION
 // ======================================================
@@ -40,6 +41,7 @@ from "./layouts/TeacherLayout";
 import ParentLayout
 from "./layouts/ParentLayout";
 
+
 // ======================================================
 // SUPER ADMIN PAGES
 // ======================================================
@@ -65,18 +67,21 @@ from "./pages/superadmin/Activity";
 import AICenter
 from "./pages/superadmin/AICenter";
 
-import Settings
+import SuperAdminSettings
 from "./pages/superadmin/Settings";
-
 // ======================================================
 // ADMIN PAGES
 // ======================================================
+
 
 import Dashboard
 from "./pages/admin/Dashboard";
 
 import Students
 from "./pages/admin/Students";
+
+import AddStudent
+from "./pages/admin/AddStudent";
 
 import StudentProfile
 from "./pages/admin/StudentProfile";
@@ -86,6 +91,12 @@ from "./pages/admin/Teachers";
 
 import TeacherDetails
 from "./pages/admin/TeacherDetails";
+
+import TransferCertificates
+from "./pages/admin/TransferCertificates";
+
+import TransferCertificateView
+from "./pages/admin/TransferCertificateView";
 
 import Attendance
 from "./pages/admin/Attendance";
@@ -99,6 +110,18 @@ from "./pages/admin/Sections";
 import SectionDetails
 from "./pages/admin/SectionDetails";
 
+import AdminFinanceDashboard
+from "./pages/admin/AdminFinanceDashboard";
+
+import PromotionManagement
+from "./pages/admin/PromotionManagement";
+
+import AcademicYears
+from "./pages/admin/AcademicYears";
+import Settings
+from "./pages/admin/Settings";
+
+
 import ActivityLogs
 from "./pages/admin/ActivityLogs";
 
@@ -106,14 +129,17 @@ from "./pages/admin/ActivityLogs";
 // FEES
 // ======================================================
 
-import Fees
-from "./pages/admin/Fees";
+
+import FeeStructures
+from "./pages/admin/FeeStructures";
+
+
 
 import CollectFees
 from "./pages/admin/CollectFees";
 
-import PendingFees
-from "./pages/admin/PendingFees";
+import CollectionReports
+from "./pages/admin/CollectionReports";
 
 // ======================================================
 // EXAMS
@@ -177,6 +203,9 @@ from "./pages/parent/Results";
 
 import ParentHomework
 from "./pages/parent/ParentHomework";
+
+import FeesDashboard
+from "./pages/parent/FeesDashboard";
 
 import Notices from "./pages/admin/Notices";
 import AllNotices from "./pages/shared/AllNotices";
@@ -263,10 +292,9 @@ export default function App() {
         />
 
         <Route
-          path="settings"
-          element={<Settings />}
-        />
-
+  path="settings"
+  element={<SuperAdminSettings />}
+/>
       </Route>
 
       {/* ======================================================
@@ -293,6 +321,17 @@ export default function App() {
           index
           element={<Dashboard />}
         />
+<Route
+  path="transfer-certificates"
+  element={
+    <TransferCertificates />
+  }
+/>
+
+<Route
+  path="transfer-certificates/:id"
+  element={<TransferCertificateView />}
+/>
 
         <Route
           path="students"
@@ -300,9 +339,16 @@ export default function App() {
         />
 
         <Route
+  path="students/add"
+  element={<AddStudent />}
+/>
+        
+        <Route
           path="student/:id"
           element={<StudentProfile />}
         />
+
+        
 
         <Route
           path="teachers"
@@ -331,24 +377,59 @@ export default function App() {
         />
 
         <Route
+          path="settings"
+          element={<Settings />}
+        />
+
+        <Route
           path="classes/:id"
           element={<SectionDetails />}
         />
 
-        <Route
-          path="fees"
-          element={<Fees />}
-        />
+       <Route
+  path="promotions"
+  element={<PromotionManagement />}
+/>
+
+<Route
+  path="academic-years"
+  element={<AcademicYears />}
+/>
+
+       <Route
+
+  path="fee-structures"
+
+  element={<FeeStructures />}
+
+/>
 
         <Route
           path="collect-fees"
           element={<CollectFees />}
         />
 
-        <Route
-          path="pending-fees"
-          element={<PendingFees />}
-        />
+       <Route
+
+  path="collection-reports"
+
+  element={
+    <CollectionReports />
+  }
+
+/>
+
+      <Route
+
+  path="finance"
+
+  element={
+    <AdminFinanceDashboard />
+  }
+
+/>
+
+      
 
         <Route
           path="activity-logs"
@@ -537,6 +618,14 @@ export default function App() {
             <ParentHomework />
           }
         />
+<Route
+
+  path="fees-dashboard"
+
+  element={<FeesDashboard />}
+
+/>
+        
 
         <Route
   path="notices"

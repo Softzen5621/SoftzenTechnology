@@ -1,4 +1,17 @@
 import {
+  Bell,
+  LayoutDashboard,
+  CalendarCheck,
+  BookOpen,
+  GraduationCap,
+  Clock3,
+  FileText,
+  User,
+  LogOut
+} from "lucide-react";
+
+
+import {
   useEffect,
   useState
 } from "react";
@@ -329,7 +342,7 @@ export default function MyClasses() {
                         text-3xl
                       "
                     >
-                      👨‍🎓
+                  <span><GraduationCap size={40} /></span> 
                     </div>
 
                   </div>
@@ -388,7 +401,7 @@ export default function MyClasses() {
                         relative
                       "
                     >
-                      📋 Attendance
+                      Attendance
                     </span>
 
                   </button>
@@ -439,7 +452,7 @@ export default function MyClasses() {
                         relative
                       "
                     >
-                      📚 Homework
+                       Homework
                     </span>
 
                   </button>
@@ -483,7 +496,7 @@ export default function MyClasses() {
                         relative
                       "
                     >
-                      📝 Marks
+                      Marks
                     </span>
 
                   </button>

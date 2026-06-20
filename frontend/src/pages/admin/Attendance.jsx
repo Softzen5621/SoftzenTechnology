@@ -1,3 +1,5 @@
+import StudentAttendanceModal
+from "../../components/StudentAttendanceModal";
 import {
   CalendarDays,
   Users,
@@ -16,7 +18,22 @@ import {
 
 import API
 from "../../services/api";
+const iconMap = {
 
+  "Total Students": Users,
+
+  "Present Today": UserCheck,
+
+  "Absent Today": UserX,
+
+  "Late Entries": Clock3,
+
+  "Attendance %": Percent,
+
+  "Low Attendance": AlertTriangle,
+
+  "Classes Marked": CalendarDays
+};
 // ======================================================
 // ADMIN ATTENDANCE
 // ======================================================
@@ -29,12 +46,24 @@ const [selectedClass, setSelectedClass] =
   useState("All Classes");
 
   const [selectedDate, setSelectedDate] =
-  useState("");
+  useState(
+    new Date()
+      .toISOString()
+      .split("T")[0]
+  );
 const [selectedStatus, setSelectedStatus] =
   useState("All Status");
 
 const [selectedStudent, setSelectedStudent] =
   useState(null);
+
+  const [markedClasses,
+  setMarkedClasses] =
+  useState([]);
+
+const [pendingClasses,
+  setPendingClasses] =
+  useState([]);
 
 const [showModal, setShowModal] =
   useState(false);
@@ -63,98 +92,337 @@ const [showModal, setShowModal] =
 
 const [classes, setClasses] =
   useState([]);
+
+  const [stats, setStats] =
+  useState([]);
+
+  const [holidays, setHolidays] =
+  useState([]);
+
+  const [page, setPage] = useState(1);
+
+const [totalPages, setTotalPages] =
+  useState(1);
   // ======================================================
   // DUMMY DATA
   // ======================================================
 
-  const stats = [
+  // const stats = [
 
-    {
-      title: "Total Students",
-      value: "2,540",
-      icon: Users,
-      color:
-        "from-blue-600 to-cyan-500"
-    },
+  //   {
+  //     title: "Total Students",
+  //     value: "299",
+  //     icon: Users,
+  //     color:
+  //       "from-blue-600 to-cyan-500"
+  //   },
 
-    {
-      title: "Present Today",
-      value: "2,301",
-      icon: UserCheck,
-      color:
-        "from-green-600 to-emerald-500"
-    },
+  //   {
+  //     title: "Present Today",
+  //     value: "215",
+  //     icon: UserCheck,
+  //     color:
+  //       "from-green-600 to-emerald-500"
+  //   },
 
-    {
-      title: "Absent Today",
-      value: "239",
-      icon: UserX,
-      color:
-        "from-red-600 to-pink-500"
-    },
+  //   {
+  //     title: "Absent Today",
+  //     value: "75",
+  //     icon: UserX,
+  //     color:
+  //       "from-red-600 to-pink-500"
+  //   },
 
-    {
-      title: "Late Entries",
-      value: "41",
-      icon: Clock3,
-      color:
-        "from-yellow-500 to-orange-500"
-    },
+  //   {
+  //     title: "Late Entries",
+  //     value: "9",
+  //     icon: Clock3,
+  //     color:
+  //       "from-yellow-500 to-orange-500"
+  //   },
 
-    {
-      title: "Attendance %",
-      value: "91%",
-      icon: Percent,
-      color:
-        "from-purple-600 to-violet-500"
-    },
+  //   {
+  //     title: "Attendance %",
+  //     value: "95%",
+  //     icon: Percent,
+  //     color:
+  //       "from-purple-600 to-violet-500"
+  //   },
 
-    {
-      title: "Low Attendance",
-      value: "18",
-      icon: AlertTriangle,
-      color:
-        "from-rose-600 to-red-500"
-    }
-  ];
+  //   {
+  //     title: "Low Attendance",
+  //     value: "18",
+  //     icon: AlertTriangle,
+  //     color:
+  //       "from-rose-600 to-red-500"
+  //   }
+  // ];
 
   // ======================================================
   // UI
   // ======================================================
 useEffect(() => {
 
-  fetchStudents();
+  
+  fetchDashboard();
+  fetchHolidays();
+
+}, [
+
+  selectedDate,
+  selectedClass
+]);
+
+useEffect(() => {
+
   fetchClasses();
 
 }, []);
+useEffect(() => {
 
-const fetchStudents =
+  if (holidays.length > 0) {
+
+    fetchStudents();
+
+  }
+
+}, [
+  holidays,
+  page,
+  selectedDate,
+  selectedClass
+]);
+
+const fetchDashboard =
+  async () => {
+
+    const res =
+      await API.get(
+  `/attendance/dashboard?date=${selectedDate}`
+);
+
+    setStats(
+  res.data.stats.map(item => ({
+    ...item,
+    color:
+      item.title === "Total Students"
+        ? "from-blue-600 to-cyan-500"
+      : item.title === "Present Today"
+        ? "from-green-600 to-emerald-500"
+      : item.title === "Absent Today"
+        ? "from-red-600 to-pink-500"
+      : item.title === "Late Entries"
+        ? "from-yellow-500 to-orange-500"
+      : item.title === "Attendance %"
+        ? "from-purple-600 to-violet-500"
+      : "from-slate-600 to-slate-500"
+  }))
+);
+
+    setMarkedClasses(
+      res.data.markedClassList
+    );
+
+    setPendingClasses(
+      res.data.pendingClassList
+    );
+  };
+const fetchHolidays =
   async () => {
 
     try {
 
       const res =
         await API.get(
-          "/students"
+          "/holidays/all"
         );
+
+      setHolidays(
+        res.data.holidays || []
+      );
+
+    } catch (err) {
+
+      console.log(err);
+    }
+  };
+
+
+const fetchStudents =
+  async () => {
+
+    try {
+
+      const query =
+
+selectedClass ===
+"All Classes"
+
+? `/students?page=${page}&limit=50`
+
+: `/students?page=${page}&limit=50&className=${selectedClass}`;
+
+const res =
+  await API.get(query);
+
+setTotalPages(
+  res.data.totalPages || 1
+);
+        
 
       const studentsData =
         res.data.students || [];
+const bulkAttendance =
+  await API.post(
 
-      const updatedStudents =
+    "/attendance/bulk-status",
+
+    {
+
+      attendanceDate:
+        selectedDate,
+
+      studentIds:
+
         studentsData.map(
-          (student) => ({
+          s => s._id
+        )
+    }
+  );
+        
+const attendanceMap =
+  {};
+
+bulkAttendance.data.attendance.forEach(
+
+  item => {
+
+    attendanceMap[
+  item.studentId.toString()
+] = item;
+  }
+);
+
+   const updatedStudents =
+  await Promise.all(
+
+    studentsData.map(
+      async (student) => {
+
+        try {
+
+const attendanceRecord =
+
+  attendanceMap[
+    student._id.toString()
+  ];
+
+
+          const todayDate =
+  selectedDate ||
+  new Date()
+    .toISOString()
+    .split("T")[0];
+
+const isHoliday =
+  holidays.some(
+    (holiday) => {
+
+      const start =
+        new Date(
+          holiday.startDate
+        )
+          .toISOString()
+          .split("T")[0];
+
+      const end =
+        new Date(
+          holiday.endDate
+        )
+          .toISOString()
+          .split("T")[0];
+
+      return (
+        todayDate >= start &&
+        todayDate <= end
+      );
+    }
+  );
+
+let attendanceStatus =
+  isHoliday
+    ? "Holiday"
+    : "Not Marked";
+
+if (attendanceRecord) {
+
+  attendanceStatus =
+    attendanceRecord.status;
+}
+            
+
+          return {
 
             ...student,
 
-            attendanceStatus:
-              "Present",
+           attendancePercentage:
+  null,
 
-            attendancePercentage:
-              0
-          })
+            attendanceStatus
+          };
+
+        }
+
+        catch {
+
+  const todayDate =
+    selectedDate ||
+    new Date()
+      .toISOString()
+      .split("T")[0];
+
+  const isHoliday =
+    holidays.some(
+      holiday => {
+
+        const start =
+          new Date(
+            holiday.startDate
+          )
+          .toISOString()
+          .split("T")[0];
+
+        const end =
+          new Date(
+            holiday.endDate
+          )
+          .toISOString()
+          .split("T")[0];
+
+        return (
+          todayDate >= start &&
+          todayDate <= end
         );
+      }
+    );
 
+  return {
+
+    ...student,
+
+    attendancePercentage:
+      null,
+
+    attendanceStatus:
+      isHoliday
+        ? "Holiday"
+        : "Not Marked"
+  };
+}
+      }
+    )
+  );
+  
       setStudents(
         updatedStudents
       );
@@ -174,8 +442,22 @@ const fetchClasses =
           "/sections"
         );
 
+      const sections =
+        res.data.sections || [];
+
+      const uniqueClasses = [
+
+        ...new Set(
+
+          sections.map(
+            item =>
+              item.className
+          )
+        )
+      ];
+
       setClasses(
-       res.data.sections || []
+        uniqueClasses
       );
 
     } catch (err) {
@@ -183,7 +465,6 @@ const fetchClasses =
       console.log(err);
     }
   };
-
 const filteredStudents =
   students.filter(    (student) => {
 
@@ -209,10 +490,11 @@ const filteredStudents =
           ? true
 
           : (
-  student.sectionId?.sectionName ||
-  student.sectionId?.name ||
-  student.section ||
-  student.className
+  student.sectionId?.className ||
+student.sectionId?.sectionName ||
+student.sectionId?.name ||
+student.section ||
+student.className
 ) === selectedClass;
 
       const matchesStatus =
@@ -371,7 +653,9 @@ const filteredStudents =
             (item, index) => {
 
               const Icon =
-                item.icon;
+  item.icon ||
+  iconMap[item.title] ||
+  Users;
 
               return (
 
@@ -485,7 +769,7 @@ const filteredStudents =
             flex
             items-center
             gap-3
-            flex-1
+            flex-[0.6]
             px-5
             py-4
             rounded-2xl
@@ -523,20 +807,63 @@ onChange={(e) =>
           />
 
         </div>
+        <select
+  className="
+    px-4
+    py-4
+    rounded-2xl
+    border
+    border-slate-200
+    bg-white
+  "
+>
+  <option>
+    Marked Classes ({markedClasses.length})
+  </option>
+
+  {markedClasses.map(cls => (
+    <option key={cls}>
+      {cls}
+    </option>
+  ))}
+</select>
+
+<select
+  className="
+    px-4
+    py-4
+    rounded-2xl
+    border
+    border-slate-200
+    bg-white
+  "
+>
+  <option>
+    Pending Classes ({pendingClasses.length})
+  </option>
+
+  {pendingClasses.map(cls => (
+    <option key={cls}>
+      {cls}
+    </option>
+  ))}
+</select>
 
         {/* DATE */}
 
         <input
           type="date"
           value={selectedDate}
+onChange={(e) => {
 
-onChange={(e) =>
   setSelectedDate(
     e.target.value
-  )
-}
+  );
 
-          className="
+  setPage(1);
+
+}}          
+className="
             px-5
             py-4
             rounded-2xl
@@ -553,12 +880,18 @@ onChange={(e) =>
         <select
         value={selectedClass}
 
-onChange={(e) =>
+onChange={(e) => {
+
   setSelectedClass(
     e.target.value
-  )
-}
-          className="
+  );
+
+  setPage(1);
+
+}}
+
+
+        className="
             px-5
             py-4
             rounded-2xl
@@ -576,20 +909,14 @@ onChange={(e) =>
 
 {
   classes?.map(
-    (item) => (
+  (cls) => (
 
-      <option
-        key={item._id}
-        value={
-          item.sectionName ||
-          `${item.className} - ${item.section}`
-        }
-      >
-        {
-          item.sectionName ||
-          `${item.className} - ${item.section}`
-        }
-      </option>
+     <option
+  key={cls}
+  value={cls}
+>
+  {cls}
+</option>
     )
   )
 }
@@ -617,25 +944,34 @@ onChange={(e) =>
           "
         >
 
-          <option>
+          <option value="All Status">
             All Status
           </option>
 
-          <option>
-            Present
-          </option>
+          
+          <option value="Holiday">
+  Holiday
+</option>
 
-          <option>
-            Absent
-          </option>
+<option value="Not Marked">
+  Not Marked
+</option>
 
-          <option>
-            Late
-          </option>
+<option value="Present">
+  Present
+</option>
 
-          <option>
-            Half Day
-          </option>
+<option value="Absent">
+  Absent
+</option>
+
+<option value="Late">
+  Late
+</option>
+
+<option value="Half Day">
+  Half Day
+</option>
 
         </select>
 
@@ -745,26 +1081,27 @@ onChange={(e) =>
                   {
   (() => {
   // FULL SECTION OBJECT
-  if (student.sectionId?.sectionName) {
-    return student.sectionId.sectionName;
-  }
+  if (student.sectionId?.className) {
+  return student.sectionId.className;
+}
 
-  // SIMPLE NAME
-  if (student.sectionId?.name) {
-    return student.sectionId.name;
-  }
+if (student.sectionId?.sectionName) {
+  return student.sectionId.sectionName;
+}
 
-  // STRING VALUE
-  if (student.section) {
-    return student.section;
-  }
+if (student.sectionId?.name) {
+  return student.sectionId.name;
+}
 
-  // LKG / UKG / NURSERY
-  if (student.className) {
-    return student.className;
-  }
+if (student.section) {
+  return student.section;
+}
 
-  return "N/A";
+if (student.className) {
+  return student.className;
+}
+
+return "N/A";
 })()
 }
                 </div>
@@ -776,7 +1113,7 @@ onChange={(e) =>
                     text-slate-600
                   "
                 >
-                  #{student.studentId || "N/A"}
+                  {student.studentId || "N/A"}
                 </div>
 
                 {/* STATUS */}
@@ -791,50 +1128,26 @@ onChange={(e) =>
                       text-sm
                       font-semibold
 
-                      ${
-                        
- 
-  (
-    student.attendanceStatus ||
-    "Present"
-  ) === "Present"
-
-                          ? `
-                            bg-green-100
-                            text-green-700
-                          `
-
-                          : (
-    student.attendanceStatus ||
-    "Present"
-  ) === "Absent"
-
-                          ? `
-                            bg-red-100
-                            text-red-700
-                          `
-
-                          : (
-    student.attendanceStatus ||
-    "Present"
-  ) === "Late"
-
-                          ? `
-                            bg-yellow-100
-                            text-yellow-700
-                          `
-
-                          : `
-                            bg-purple-100
-                            text-purple-700
-                          `
-                      }
+                       ${
+  student.attendanceStatus === "Present"
+    ? "bg-green-100 text-green-700"
+    : student.attendanceStatus === "Absent"
+    ? "bg-red-100 text-red-700"
+    : student.attendanceStatus === "Late"
+    ? "bg-yellow-100 text-yellow-700"
+    : student.attendanceStatus === "Half Day"
+    ? "bg-purple-100 text-purple-700"
+    : student.attendanceStatus === "Holiday"
+? "bg-blue-100 text-blue-700"
+   : student.attendanceStatus === "Not Marked"
+? "bg-amber-100 text-amber-700"
+: "bg-slate-100 text-slate-700"
+}                    
                     `}
                   >
 
                     {
-  student.attendanceStatus || "Present" ||
-  "Present"
+  student.attendanceStatus || "Not Marked"
 }
 
                   </span>
@@ -850,8 +1163,10 @@ onChange={(e) =>
                   "
                 >
                  {
-  student.attendancePercentage || 0
-}%
+  student.attendancePercentage === null
+    ? "--"
+    : `${student.attendancePercentage}%`
+}
                 </div>
 
                 {/* ACTIONS */}
@@ -915,6 +1230,32 @@ onChange={(e) =>
         }
 
       </div>
+
+<div className="flex items-center justify-center gap-4 p-6">
+
+  <button
+    disabled={page === 1}
+    onClick={() => setPage(page - 1)}
+  >
+    Previous
+  </button>
+
+  <span>
+    Page {page} of {totalPages}
+  </span>
+
+  <button
+    disabled={page === totalPages}
+    onClick={() => setPage(page + 1)}
+  >
+    Next
+  </button>
+
+</div>
+
+
+
+
 
       {/* ======================================================
           LOWER GRID
@@ -1099,178 +1440,15 @@ onChange={(e) =>
       </div>
       {
   showModal && (
-
-    <div
-      className="
-        fixed
-        inset-0
-        bg-black/50
-        backdrop-blur-sm
-        flex
-        items-center
-        justify-center
-        z-50
-        p-4
-      "
-    >
-
-      <div
-        className="
-          w-full
-          max-w-2xl
-          bg-white
-          rounded-3xl
-          p-8
-          shadow-2xl
-        "
-      >
-
-        <div
-          className="
-            flex
-            items-center
-            justify-between
-            mb-6
-          "
-        >
-
-          <div>
-
-            <h2
-              className="
-                text-3xl
-                font-black
-                text-slate-900
-              "
-            >
-              {
-                selectedStudent?.name
-              }
-            </h2>
-
-            <p
-              className="
-                text-slate-500
-                mt-1
-              "
-            >
-            {
-  selectedStudent?.sectionId?.sectionName ||
-  selectedStudent?.sectionId?.name ||
-  selectedStudent?.section ||
-  selectedStudent?.className ||
-  "N/A"
-}
-            </p>
-
-          </div>
-
-          <button
-
-            onClick={() =>
-
-              setShowModal(
-                false
-              )
-            }
-
-            className="
-              px-5
-              py-2
-              rounded-xl
-              bg-red-500
-              text-white
-            "
-          >
-
-            Close
-
-          </button>
-
-        </div>
-
-        <div
-          className="
-            grid
-            grid-cols-2
-            gap-5
-          "
-        >
-
-          <div
-            className="
-              bg-green-50
-              border
-              border-green-200
-              rounded-2xl
-              p-5
-            "
-          >
-
-            <p
-              className="
-                text-green-700
-              "
-            >
-              Attendance %
-            </p>
-
-            <h2
-              className="
-                text-4xl
-                font-black
-                text-green-900
-                mt-2
-              "
-            >
-              {
-                selectedStudent?.attendancePercentage || "0%"
-              }
-            </h2>
-
-          </div>
-
-          <div
-            className="
-              bg-blue-50
-              border
-              border-blue-200
-              rounded-2xl
-              p-5
-            "
-          >
-
-            <p
-              className="
-                text-blue-700
-              "
-            >
-              Current Status
-            </p>
-
-            <h2
-              className="
-                text-3xl
-                font-black
-                text-blue-900
-                mt-2
-              "
-            >
-              {
-                selectedStudent?.attendanceStatus || "Present"
-              }
-            </h2>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
+    <StudentAttendanceModal
+      student={selectedStudent}
+      onClose={() => {
+        setShowModal(false);
+        setSelectedStudent(null);
+      }}
+    />
   )
 }
-
     </div>
   );
 }

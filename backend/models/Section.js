@@ -127,6 +127,12 @@ const sectionSchema =
         trim: true,
       },
 
+      promotionOrder: {
+
+  type: Number,
+
+  default: 0
+},
 
       // ======================================================
       // OPTIONAL SECTION
@@ -223,12 +229,12 @@ const sectionSchema =
       // ACADEMIC YEAR
       // ======================================================
 
-      academicYear: {
+     academicYear: {
 
-        type: String,
+  type: String,
 
-        default: "2025-26",
-      },
+  default: ""
+},
 
 
       // ======================================================
@@ -420,22 +426,16 @@ sectionSchema.pre(
 // ======================================================
 // INDEXES
 // ======================================================
-
 sectionSchema.index(
-
-  {
-
-    schoolId: 1,
-
-    displayName: 1,
-  },
-
-  {
-
-    unique: true,
-  }
+{
+  schoolId: 1,
+  academicYear: 1,
+  displayName: 1
+},
+{
+  unique: true
+}
 );
-
 
 sectionSchema.index({
 
@@ -451,6 +451,15 @@ sectionSchema.index({
 
   status: 1,
 });
+
+sectionSchema.index({
+
+  schoolId: 1,
+
+  academicYear: 1
+});
+
+
 
 
 // ======================================================

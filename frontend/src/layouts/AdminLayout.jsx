@@ -1,6 +1,8 @@
 import {
-  useState
+  useState,
+  useEffect
 } from "react";
+
 
 import {
   Link,
@@ -32,7 +34,6 @@ import {
 } from "lucide-react";
 
 
-
 import {
   useAuth
 } from "../context/AuthContext";
@@ -49,6 +50,76 @@ export default function AdminLayout() {
     user,
     logout
   } = useAuth();
+
+  const [
+
+  activeAcademicYear,
+
+  setActiveAcademicYear
+
+] = useState("");
+
+useEffect(() => {
+
+  const loadYear =
+    async () => {
+
+      try {
+
+        const auth =
+          JSON.parse(
+
+            localStorage.getItem(
+              "erp_auth"
+            ) || "{}"
+          );
+
+        const token =
+          auth?.token;
+
+        const res =
+          await fetch(
+
+            `${
+              import.meta.env
+                .VITE_API_URL
+            }/academic-years/active`,
+
+            {
+              headers: {
+
+                Authorization:
+                  `Bearer ${token}`
+              }
+            }
+          );
+
+        const data =
+          await res.json();
+
+        if (
+
+          data?.academicYear
+
+        ) {
+
+          setActiveAcademicYear(
+
+            data.academicYear.name
+          );
+        }
+
+      } catch (err) {
+
+        console.error(
+          err
+        );
+      }
+    };
+
+  loadYear();
+
+}, []);
 
   // ======================
   // MENU
@@ -87,28 +158,46 @@ export default function AdminLayout() {
     },
 
     {
+  name: "Academic Years",
+  path: "/admin/academic-years",
+  icon: CalendarDays
+},
+
+{
+  name: "Promotions",
+  path: "/admin/promotions",
+  icon: GraduationCap
+},
+
+    {
       name: "Attendance",
       path: "/admin/attendance",
       icon: CalendarCheck
     },
+{
+  name: "Fee Structures",
+  path: "/admin/fee-structures",
+  icon: Wallet
+},
 
-    {
-      name: "Fees",
-      path: "/admin/fees",
-      icon: Wallet
-    },
+{
+  name: "Collect Fees",
+  path: "/admin/collect-fees",
+  icon: CreditCard
+},
 
-    {
-      name: "Collect Fees",
-      path: "/admin/collect-fees",
-      icon: CreditCard
-    },
+{
+  name: "Collection Reports",
+  path: "/admin/collection-reports",
+  icon: BarChart3
+},
 
-    {
-      name: "Pending Fees",
-      path: "/admin/pending-fees",
-      icon: AlertCircle
-    },
+{
+  name: "Finance Dashboard",
+  path: "/admin/finance",
+  icon: Wallet
+},
+  
 
     {
       name: "Exams",
@@ -139,6 +228,12 @@ export default function AdminLayout() {
   name: "Activity Logs",
   path: "/admin/activity-logs",
   icon: ScrollText
+},
+
+{
+  name: "Transfer Certificates",
+  path: "/admin/transfer-certificates",
+  icon: FileText
 },
 
 {
@@ -460,30 +555,64 @@ export default function AdminLayout() {
           "
         >
 
-          {/* LEFT */}
-          <div>
+         {/* LEFT */}
+<div>
 
-            <h1
-              className="
-                text-3xl
-                font-black
-                text-slate-800
-              "
-            >
-              School Management
-            </h1>
+  <h1
+    className="
+      text-3xl
+      font-black
+      text-slate-800
+    "
+  >
+    School Management
+  </h1>
 
-            <p
-              className="
-                text-slate-500
-                mt-1
-              "
-            >
-              Smart ERP Dashboard
-            </p>
+  <div
+    className="
+      flex
+      items-center
+      gap-3
+      mt-1
+    "
+  >
 
-          </div>
+    <p
+      className="
+        text-slate-500
+      "
+    >
+      Smart ERP Dashboard
+    </p>
 
+    <span
+      className="
+        px-3
+        py-1
+        rounded-full
+        bg-green-100
+        text-green-700
+        text-xs
+        font-semibold
+      "
+    >
+
+      Academic Year:
+
+      {" "}
+
+      {
+
+        activeAcademicYear ||
+
+        "Loading..."
+      }
+
+    </span>
+
+  </div>
+
+</div>
           {/* RIGHT */}
           <div
             className="

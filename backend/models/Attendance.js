@@ -23,6 +23,13 @@ const attendanceSchema =
         trim: true
       },
 
+      attendanceDateString: {
+
+  type: String,
+
+  required: true
+},
+
       // ==================================================
       // STUDENT
       // ==================================================
@@ -196,14 +203,13 @@ const attendanceSchema =
 // ======================================================
 // UNIQUE DAILY ATTENDANCE
 // ======================================================
-
 attendanceSchema.index({
 
   schoolId: 1,
 
   studentId: 1,
 
-  attendanceDate: 1
+  attendanceDateString: 1
 
 }, {
 
@@ -220,20 +226,30 @@ attendanceSchema.index({
 
   classId: 1,
 
-  attendanceDate: 1
+  attendanceDateString: 1
 });
-
 // ======================================================
 // STUDENT HISTORY INDEX
 // ======================================================
+attendanceSchema.index({
+
+  schoolId: 1,
+
+  studentId: 1,
+
+  attendanceDateString: -1
+
+});
 
 attendanceSchema.index({
 
   schoolId: 1,
 
-  studentId: 1
-});
+  attendanceDateString: 1,
 
+  studentId: 1
+
+});
 // ======================================================
 // EXPORT
 // ======================================================

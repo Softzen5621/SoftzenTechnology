@@ -1,0 +1,534 @@
+/* =====================================================
+   MOBILE ATTENDANCE UI
+===================================================== */
+
+@media (max-width: 768px) {
+
+  /* HEADER */
+
+  .attendance-header {
+    margin-bottom: 12px !important;
+  }
+
+  .attendance-title {
+    font-size: 24px !important;
+    line-height: 1.15 !important;
+  }
+
+  .attendance-subtitle,
+  .attendance-class-badge {
+    display: none !important;
+  }
+
+  /* SEARCH */
+
+  .attendance-search {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .attendance-search input,
+  input.attendance-search {
+    width: 100% !important;
+    height: 42px !important;
+    font-size: 13px !important;
+    padding: 0 14px !important;
+  }
+
+  /* ACTIONS AREA */
+
+  .attendance-actions {
+    display: flex !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 10px !important;
+  }
+
+  .attendance-actions button {
+    flex: 1 !important;
+    min-width: 0 !important;
+    height: 42px !important;
+    font-size: 11px !important;
+    padding: 0 8px !important;
+  }
+
+  /* DATE + SAVE */
+
+  .attendance-controls {
+    display: flex !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+  }
+
+  .attendance-date,
+  .attendance-save {
+    flex: 1 !important;
+    height: 42px !important;
+    min-width: 0 !important;
+    font-size: 11px !important;
+    padding: 0 10px !important;
+  }
+
+  /* STATUS */
+
+  .attendance-status {
+    width: 100% !important;
+    text-align: center !important;
+    margin-top: 6px !important;
+  }
+
+  .attendance-status > div:first-child {
+    font-size: 10px !important;
+    padding: 6px 10px !important;
+  }
+
+  .attendance-status .last-saved {
+    font-size: 10px !important;
+  }
+
+  /* SUMMARY CARDS */
+
+  .attendance-summary {
+    display: flex !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    padding-bottom: 4px !important;
+    scrollbar-width: none;
+  }
+
+  .attendance-summary::-webkit-scrollbar {
+    display: none;
+  }
+
+  .attendance-summary > div {
+    min-width: 72px !important;
+    min-height: auto !important;
+    padding: 8px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .attendance-summary p {
+    font-size: 9px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .attendance-summary h2 {
+    font-size: 16px !important;
+    margin: 0 !important;
+  }
+
+  /* STUDENT TABLE */
+
+  table th {
+    font-size: 12px !important;
+    padding: 10px 8px !important;
+  }
+
+  table td {
+    padding: 10px 8px !important;
+  }
+
+  .student-id {
+    display: none !important;
+  }
+
+  .student-name {
+    font-size: 13px !important;
+    line-height: 1.25 !important;
+  }
+
+  /* STATUS BUTTONS */
+
+  .student-status-grid {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    gap: 4px !important;
+  }
+
+  .student-status-grid button {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    border-radius: 8px !important;
+    font-size: 10px !important;
+    padding: 0 !important;
+  }
+
+  /* REASON HIDE */
+
+  .student-reason {
+    display: none !important;
+  }
+
+  /* HOLIDAY */
+
+  .holiday-banner {
+    padding: 12px !important;
+  }
+
+  /* REMOVE EXTRA TOP ITEMS */
+
+  .mobile-hide {
+    display: none !important;
+  }
+}
+
+
+/* =====================================================
+   EXTRA SMALL DEVICES
+===================================================== */
+
+@media (max-width: 480px) {
+
+  .attendance-title {
+    font-size: 22px !important;
+  }
+
+  .attendance-actions button,
+  .attendance-date,
+  .attendance-save {
+    font-size: 10px !important;
+  }
+
+  .attendance-summary > div {
+    min-width: 65px !important;
+  }
+
+  .attendance-summary h2 {
+    font-size: 14px !important;
+  }
+
+  .student-status-grid button {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    font-size: 9px !important;
+  }
+  /* ==========================================
+   PROFESSIONAL MOBILE HEADER FIX
+========================================== */
+
+@media (max-width:768px){
+
+  /* Hide extra top section */
+
+  .attendance-subtitle,
+  .attendance-class-badge{
+    display:none !important;
+  }
+
+  /* Search full width */
+
+  .attendance-search{
+    width:100% !important;
+    margin-bottom:8px !important;
+  }
+
+  .attendance-search input{
+    width:100% !important;
+    height:42px !important;
+  }
+
+  /* Search + Date + Update same row */
+
+  .attendance-top-controls{
+    display:grid !important;
+    grid-template-columns:1.4fr .9fr 1fr !important;
+    gap:8px !important;
+    align-items:center !important;
+  }
+
+  .attendance-date{
+    width:100% !important;
+    margin:0 !important;
+    height:42px !important;
+  }
+
+  .attendance-save{
+    width:100% !important;
+    margin:0 !important;
+    height:42px !important;
+  }
+
+  /* Present Absent Row */
+
+  .attendance-actions{
+    display:grid !important;
+    grid-template-columns:1fr 1fr auto !important;
+    gap:8px !important;
+    margin-top:8px !important;
+    align-items:center !important;
+  }
+
+  .attendance-actions button{
+    height:38px !important;
+    font-size:11px !important;
+    padding:0 8px !important;
+  }
+
+  /* Attendance marked beside buttons */
+
+  .attendance-status{
+    margin:0 !important;
+    width:auto !important;
+    text-align:left !important;
+  }
+
+  .attendance-status > div:first-child{
+    font-size:9px !important;
+    padding:4px 8px !important;
+    white-space:nowrap !important;
+  }
+
+  .attendance-status .last-saved{
+    display:none !important;
+  }
+
+  /* Compact Stats */
+
+  .attendance-summary{
+    display:grid !important;
+    grid-template-columns:repeat(5,1fr) !important;
+    gap:4px !important;
+  }
+
+  .attendance-summary > div{
+    padding:6px !important;
+    min-height:60px !important;
+  }
+
+  .attendance-summary p{
+    font-size:9px !important;
+  }
+
+  .attendance-summary h2{
+    font-size:14px !important;
+  }
+}
+
+/* ====================================
+TOP CONTROLS
+==================================== */
+
+.attendance-top-controls{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.attendance-search{
+  flex:1;
+  min-width:280px;
+}
+
+.attendance-date{
+  width:150px;
+}
+
+.attendance-save{
+  min-width:170px;
+}
+
+/* ====================================
+MOBILE
+==================================== */
+
+@media (max-width:768px){
+
+  /* Hide unnecessary info */
+
+  .attendance-subtitle,
+  .attendance-class-badge{
+    display:none !important;
+  }
+
+  /* Header */
+
+  .attendance-header{
+    margin-bottom:12px !important;
+  }
+
+  .attendance-title{
+    font-size:22px !important;
+    line-height:1.2 !important;
+  }
+
+  /* Search + Date + Save in one row */
+
+  .attendance-top-controls{
+    display:grid !important;
+    grid-template-columns:1fr 110px 130px;
+    gap:8px;
+    width:100%;
+    margin-bottom:8px;
+  }
+
+  .attendance-search{
+    min-width:unset !important;
+    width:100% !important;
+  }
+
+  .attendance-search input{
+    width:100% !important;
+    height:42px !important;
+    font-size:13px !important;
+  }
+
+  .attendance-date{
+    width:100% !important;
+    height:42px !important;
+  }
+
+  .attendance-save{
+    width:100% !important;
+    min-width:unset !important;
+    height:42px !important;
+  }
+
+  /* Present Absent Buttons */
+
+  .attendance-actions{
+    display:flex !important;
+    gap:8px !important;
+    margin-top:0 !important;
+  }
+
+  .attendance-actions button{
+    flex:1 !important;
+    height:38px !important;
+    font-size:11px !important;
+    min-width:0 !important;
+  }
+
+  /* Status */
+
+  .attendance-status{
+    margin-top:6px !important;
+    text-align:center !important;
+  }
+
+  .attendance-status .last-saved{
+    font-size:10px !important;
+  }
+
+  /* Summary Cards */
+
+  .attendance-summary{
+    display:grid !important;
+    grid-template-columns:repeat(5,1fr) !important;
+    gap:4px !important;
+    margin-top:10px !important;
+  }
+
+  .attendance-summary > div{
+    min-width:auto !important;
+    min-height:60px !important;
+    padding:6px !important;
+  }
+
+  .attendance-summary p{
+    font-size:9px !important;
+    margin-bottom:2px !important;
+  }
+
+  .attendance-summary h2{
+    font-size:14px !important;
+    margin:0 !important;
+  }
+
+  /* Student Table */
+
+  table th{
+    font-size:11px !important;
+    padding:8px !important;
+  }
+
+  table td{
+    padding:8px !important;
+  }
+
+  .student-id{
+    display:none !important;
+  }
+
+  .student-name{
+    font-size:12px !important;
+    line-height:1.25 !important;
+  }
+
+  /* Status Buttons */
+
+  .student-status-grid{
+    display:flex !important;
+    gap:4px !important;
+    flex-wrap:nowrap !important;
+    justify-content:center !important;
+  }
+
+  .student-status-grid button{
+    width:28px !important;
+    height:28px !important;
+    min-width:28px !important;
+    padding:0 !important;
+    font-size:10px !important;
+    border-radius:8px !important;
+  }
+
+  /* Hide Reason on Mobile */
+
+  .student-reason{
+    display:none !important;
+  }
+
+  .holiday-banner{
+    padding:12px !important;
+  }
+
+  .mobile-hide{
+    display:none !important;
+  }
+}
+
+/* ====================================
+EXTRA SMALL DEVICES
+==================================== */
+
+@media (max-width:480px){
+
+  .attendance-top-controls{
+    grid-template-columns:1fr !important;
+  }
+
+  .attendance-search,
+  .attendance-date,
+  .attendance-save{
+    width:100% !important;
+  }
+
+  .attendance-actions{
+    display:grid !important;
+    grid-template-columns:1fr 1fr;
+  }
+
+  .attendance-summary{
+    overflow-x:auto !important;
+    display:flex !important;
+    gap:4px !important;
+  }
+
+  .attendance-summary > div{
+    min-width:65px !important;
+  }
+
+  .student-status-grid button{
+    width:26px !important;
+    height:26px !important;
+    min-width:26px !important;
+    font-size:9px !important;
+  }
+}
+
+}

@@ -1,43 +1,231 @@
+const Holiday =
+  require("../models/Holiday");
 const Attendance =
   require("../models/Attendance");
 
 const Teacher =
   require("../models/Teacher");
 
+const Student =
+  require("../models/Student");
+
+const Section =
+  require("../models/Section");
+
 // ======================================================
 // DATE HELPER
 // ======================================================
 
-const getDateRange =
-  (date) => {
+ exports.getStudentAttendanceHistory =
+async (req,res)=>{
 
-    const start =
-      new Date(date);
+ try{
 
-    start.setHours(
-      0,
-      0,
-      0,
-      0
-    );
+  const { studentId } = req.query;
 
-    const end =
-      new Date(date);
+  const attendance =
+    await Attendance.find({
 
-    end.setHours(
-      23,
-      59,
-      59,
-      999
-    );
+      schoolId:
+        req.user.schoolId,
 
-    return {
+      studentId
 
-      start,
+    }).sort({
+  attendanceDate: 1
+});
+  const totalPresent =
+    attendance.filter(
+      item =>
+        item.status === "Present"
+    ).length;
 
-      end
-    };
-  };
+  const totalAbsent =
+    attendance.filter(
+      item =>
+        item.status === "Absent"
+    ).length;
+
+  const totalLate =
+    attendance.filter(
+      item =>
+        item.status === "Late"
+    ).length;
+
+  const totalHalfDay =
+    attendance.filter(
+      item =>
+        item.status === "Half Day"
+    ).length;
+
+  const effectivePresent =
+
+    totalPresent +
+    totalLate +
+    totalHalfDay;
+
+  const attendancePercentage =
+
+    attendance.length > 0
+
+      ? (
+          (
+            effectivePresent /
+            attendance.length
+          ) * 100
+        ).toFixed(1)
+
+      : 0;
+
+  return res.status(200).json({
+
+    success:true,
+
+    attendance,
+
+    summary:{
+
+      totalDays:
+        attendance.length,
+
+      totalPresent,
+
+      totalAbsent,
+
+      totalLate,
+
+      totalHalfDay,
+
+      attendancePercentage
+    }
+  });
+
+ }catch(error){
+
+  console.log(error);
+
+  return res.status(500).json({
+
+    success:false,
+
+    msg:"Failed to fetch attendance history"
+  });
+ }
+};
+
+
+exports.getStudentAttendanceByDate =
+async (req,res)=>{
+
+ try{
+
+  const {
+    studentId,
+    attendanceDate
+  } = req.query;
+
+  const attendanceDateString =
+    new Date(attendanceDate)
+      .toLocaleDateString(
+        "en-CA",
+        {
+          timeZone:"Asia/Kolkata"
+        }
+      );
+
+  const attendance =
+    await Attendance.findOne({
+
+      schoolId:
+        req.user.schoolId,
+
+      studentId,
+
+      attendanceDateString
+    });
+
+  return res.status(200).json({
+
+    success:true,
+
+    attendance
+  });
+
+ }catch(error){
+
+  console.log(error);
+
+  return res.status(500).json({
+
+    success:false
+  });
+ }
+};
+
+
+exports.getAttendanceStatusBulk =
+
+
+async (req,res)=>{
+
+ try{
+
+  const {
+    attendanceDate,
+    studentIds
+  } = req.body;
+
+  if (
+  !attendanceDate ||
+  !studentIds ||
+  !Array.isArray(studentIds)
+) {
+  return res.status(400).json({
+    success:false,
+    msg:"Invalid request"
+  });
+}
+  const attendanceDateString =
+    new Date(attendanceDate)
+      .toLocaleDateString(
+        "en-CA",
+        {
+          timeZone:"Asia/Kolkata"
+        }
+      );
+
+  const attendance =
+    await Attendance.find({
+
+      schoolId:
+        req.user.schoolId,
+
+      attendanceDateString,
+
+      studentId:{
+        $in: studentIds
+      }
+
+    });
+
+  return res.status(200).json({
+
+    success:true,
+
+    attendance
+  });
+
+ }catch(error){
+
+  console.log(error);
+
+  return res.status(500).json({
+
+    success:false
+  });
+ }
+};
+
 
 // ======================================================
 // MARK BULK ATTENDANCE
@@ -61,7 +249,76 @@ exports.markAttendance =
         attendanceDate
 
       } = req.body;
+const attendanceDateString =
+  new Date(attendanceDate)
+    .toLocaleDateString(
+      "en-CA",
+      {
+        timeZone: "Asia/Kolkata"
+      }
+    );
 
+    // ==============================================
+// HOLIDAY VALIDATION
+// ==============================================
+
+const holiday =
+  await Holiday.findOne({
+
+    schoolId:
+      req.user.schoolId,
+
+    isActive: true,
+
+    startDate: {
+      $lte:
+        new Date(attendanceDate)
+    },
+
+    endDate: {
+      $gte:
+        new Date(attendanceDate)
+    }
+  });
+
+if (holiday) {
+
+  return res.status(400).json({
+
+    success: false,
+
+    msg:
+      `Attendance cannot be marked. Holiday: ${holiday.title}`
+  });
+}
+
+// ==============================================
+// FUTURE DATE VALIDATION
+// ==============================================
+
+const todayString =
+  new Date()
+    .toLocaleDateString(
+      "en-CA",
+      {
+        timeZone:
+          "Asia/Kolkata"
+      }
+    );
+
+if (
+  attendanceDateString >
+  todayString
+) {
+
+  return res.status(400).json({
+
+    success: false,
+
+    msg:
+      "Future attendance not allowed"
+  });
+}
       // ==============================================
       // VALIDATION
       // ==============================================
@@ -115,15 +372,6 @@ exports.markAttendance =
       // DATE RANGE
       // ==============================================
 
-      const {
-
-        start,
-
-        end
-
-      } = getDateRange(
-        attendanceDate
-      );
 
       // ==============================================
       // CHECK EXISTING
@@ -137,13 +385,33 @@ exports.markAttendance =
 
           classId,
 
-          attendanceDate: {
-
-            $gte: start,
-
-            $lte: end
-          }
+        attendanceDateString
         });
+
+        for (
+  const record
+  of attendanceRecords
+) {
+
+if (
+  record.status === "Absent" &&
+  record.absentReason &&
+  record.absentReason.length > 500
+)
+
+
+
+  {
+
+    return res.status(400).json({
+
+      success: false,
+
+      msg:
+        "Absent reason required"
+    });
+  }
+}
 
       // ==============================================
       // BULK OPERATIONS
@@ -155,19 +423,16 @@ exports.markAttendance =
 
             updateOne: {
 
-              filter: {
+           filter: {
 
-                schoolId:
-                  req.user.schoolId,
+  schoolId:
+    req.user.schoolId,
 
-                studentId:
-                  record.studentId,
+  studentId:
+    record.studentId,
 
-                attendanceDate:
-                  new Date(
-                    attendanceDate
-                  )
-              },
+  attendanceDateString
+},
 
               update: {
 
@@ -191,7 +456,7 @@ exports.markAttendance =
                   attendanceDate:
                     new Date(
                       attendanceDate
-                    ),
+                    ),attendanceDateString,
 
                   status:
                     record.status,
@@ -312,39 +577,34 @@ exports.checkAttendanceExists =
         });
       }
 
+      const attendanceDateString =
+  new Date(attendanceDate)
+    .toLocaleDateString(
+      "en-CA",
+      {
+        timeZone: "Asia/Kolkata"
+      }
+    );
       // ==============================================
       // DATE RANGE
       // ==============================================
 
-      const {
 
-        start,
 
-        end
-
-      } = getDateRange(
-        attendanceDate
-      );
 
       // ==============================================
       // FIND EXISTING
       // ==============================================
+const existingAttendance =
+  await Attendance.findOne({
 
-      const existingAttendance =
-        await Attendance.findOne({
+    schoolId:
+      req.user.schoolId,
 
-          schoolId:
-            req.user.schoolId,
+    classId,
 
-          classId,
-
-          attendanceDate: {
-
-            $gte: start,
-
-            $lte: end
-          }
-        })
+    attendanceDateString
+  })
 
         .sort({
 
@@ -428,36 +688,28 @@ exports.getAttendance =
       // DATE RANGE
       // ==============================================
 
-      const {
-
-        start,
-
-        end
-
-      } = getDateRange(
-        attendanceDate
-      );
+      const attendanceDateString =
+  new Date(attendanceDate)
+    .toLocaleDateString(
+      "en-CA",
+      {
+        timeZone: "Asia/Kolkata"
+      }
+    );
 
       // ==============================================
       // FIND DATA
       // ==============================================
+const attendance =
+  await Attendance.find({
 
-      const attendance =
-        await Attendance.find({
+    schoolId:
+      req.user.schoolId,
 
-          schoolId:
-            req.user.schoolId,
+    classId,
 
-          classId,
-
-          attendanceDate: {
-
-            $gte: start,
-
-            $lte: end
-          }
-        })
-
+    attendanceDateString
+  })
         .populate(
 
           "studentId",
@@ -586,10 +838,9 @@ exports.getMonthlyAttendance =
           }
         })
 
-        .sort({
-
-          attendanceDate: 1
-        });
+ .sort({
+  attendanceDate: 1
+});
 
       // ==============================================
       // SUMMARY
@@ -631,19 +882,24 @@ exports.getMonthlyAttendance =
             "Half Day"
         ).length;
 
-      const attendancePercentage =
+      const effectivePresent =
 
-        attendance.length > 0
+  totalPresent +
+  totalLate +
+  totalHalfDay;
 
-          ? (
-              (
-                totalPresent /
-                attendance.length
-              ) * 100
-            ).toFixed(1)
+const attendancePercentage =
 
-          : 0;
+  attendance.length > 0
 
+    ? (
+        (
+          effectivePresent /
+          attendance.length
+        ) * 100
+      ).toFixed(1)
+
+    : 0;
       // ==============================================
       // RESPONSE
       // ==============================================
@@ -685,6 +941,220 @@ exports.getMonthlyAttendance =
 
         msg:
           "Failed to fetch monthly attendance"
+      });
+    }
+  };
+  exports.getAttendanceDashboard =
+  async (req, res) => {
+
+    try {
+
+      const schoolId =
+        req.user.schoolId;
+
+     const todayString =
+  new Date()
+    .toLocaleDateString(
+      "en-CA",
+      {
+        timeZone:
+          "Asia/Kolkata"
+      }
+    );
+
+const selectedDateString =
+  req.query.date
+    ? new Date(req.query.date)
+        .toLocaleDateString(
+          "en-CA",
+          {
+            timeZone:
+              "Asia/Kolkata"
+          }
+        )
+    : todayString;
+      const totalStudents =
+        await Student.countDocuments({
+
+          schoolId,
+
+          isActive: true
+        });
+
+      const totalClasses =
+        await Section.countDocuments({
+
+          schoolId,
+
+          isActive: true
+        });
+
+      const todayAttendance =
+        await Attendance.find({
+
+          schoolId,
+attendanceDateString:
+selectedDateString
+        });
+
+       const markedStudents =
+  todayAttendance.length; 
+
+      const presentToday =
+        todayAttendance.filter(
+          item =>
+            item.status === "Present" ||
+            item.status === "Late" ||
+            item.status === "Half Day"
+        ).length;
+
+      const absentToday =
+        todayAttendance.filter(
+          item =>
+            item.status === "Absent"
+        ).length;
+
+      const lateEntries =
+        todayAttendance.filter(
+          item =>
+            item.status === "Late"
+        ).length;
+
+      const markedClassIds =
+        [
+          ...new Set(
+
+            todayAttendance.map(
+              item =>
+                item.classId.toString()
+            )
+          )
+        ];
+
+      const markedClasses =
+        await Section.find({
+
+          _id: {
+
+            $in:
+              markedClassIds
+          }
+        });
+
+      const allClasses =
+        await Section.find({
+
+          schoolId,
+
+          isActive: true
+        });
+
+      const pendingClasses =
+        allClasses.filter(
+          cls =>
+
+            !markedClassIds.includes(
+              cls._id.toString()
+            )
+        );
+
+     const attendancePercentage =
+
+  markedStudents > 0
+
+    ? (
+        (
+          presentToday /
+          markedStudents
+        ) * 100
+      ).toFixed(1)
+
+    : 0;
+      return res.status(200).json({
+
+        success: true,
+
+        stats: [
+
+          {
+            title:
+              "Total Students",
+            value:
+              totalStudents
+          },
+
+          {
+            title:
+              "Present Today",
+            value:
+              presentToday
+          },
+
+          {
+            title:
+              "Absent Today",
+            value:
+              absentToday
+          },
+
+          {
+            title:
+              "Late Entries",
+            value:
+              lateEntries
+          },
+
+          {
+            title:
+              "Attendance %",
+            value:
+              `${attendancePercentage}%`
+          },
+
+          {
+            title:
+              "Classes Marked",
+            value:
+              markedClasses.length
+          }
+
+        ],
+
+        markedClassList:
+          markedClasses.map(
+            cls =>
+              cls.displayName
+          ),
+
+        pendingClassList:
+          pendingClasses.map(
+            cls =>
+              cls.displayName
+          ),
+
+        markedCount:
+          markedClasses.length,
+
+        pendingCount:
+          pendingClasses.length,
+
+        totalClasses
+      });
+
+    } catch (error) {
+
+      console.log(
+        "ATTENDANCE DASHBOARD ERROR"
+      );
+
+      console.log(error);
+
+      return res.status(500).json({
+
+        success: false,
+
+        msg:
+          "Failed to load dashboard"
       });
     }
   };

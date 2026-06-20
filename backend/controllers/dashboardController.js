@@ -4,11 +4,7 @@ const Student =
 const Teacher =
   require("../models/Teacher");
 
-const FeeStructure =
-  require("../models/FeeStructure");
 
-const FeePayment =
-  require("../models/FeePayment");
 
 // ======================
 // GET DASHBOARD STATS
@@ -26,6 +22,8 @@ const getDashboardStats =
       const totalStudents =
         await Student.countDocuments();
 
+
+
       // ======================
       // TOTAL TEACHERS
       // ======================
@@ -33,71 +31,7 @@ const getDashboardStats =
       const totalTeachers =
         await Teacher.countDocuments();
 
-      // ======================
-      // TOTAL FEE STRUCTURES
-      // ======================
 
-      const totalFeeStructures =
-        await FeeStructure.countDocuments();
-
-      // ======================
-      // TOTAL FEES AMOUNT
-      // ======================
-
-      const totalFees =
-        await FeeStructure.aggregate([
-
-          {
-
-            $group: {
-
-              _id: null,
-
-              total: {
-
-                $sum: "$amount"
-              }
-            }
-          }
-        ]);
-
-      // ======================
-      // TOTAL COLLECTED FEES
-      // ======================
-
-      const collectedFees =
-        await FeePayment.aggregate([
-
-          {
-
-            $group: {
-
-              _id: null,
-
-              total: {
-
-                $sum: "$amountPaid"
-              }
-            }
-          }
-        ]);
-
-      // ======================
-      // PENDING FEES
-      // ======================
-
-      const pendingFees =
-
-        (
-
-          totalFees[0]?.total || 0
-
-        ) -
-
-        (
-
-          collectedFees[0]?.total || 0
-        );
 
       // ======================
       // RECENT STUDENTS
@@ -118,19 +52,15 @@ const getDashboardStats =
             "name gender createdAt"
           );
 
+
+
       // ======================
-      // RECENT PAYMENTS
+      // EMPTY PAYMENTS
       // ======================
 
-      const recentPayments =
-        await FeePayment.find()
+      const recentPayments = [];
 
-          .sort({
 
-            createdAt: -1
-          })
-
-          .limit(5);
 
       // ======================
       // RESPONSE
@@ -146,17 +76,13 @@ const getDashboardStats =
 
           totalTeachers,
 
-          totalFeeStructures,
+          totalFeeStructures: 0,
 
-          totalFees:
+          totalFees: 0,
 
-            totalFees[0]?.total || 0,
+          collectedFees: 0,
 
-          collectedFees:
-
-            collectedFees[0]?.total || 0,
-
-          pendingFees
+          pendingFees: 0
         },
 
         recentStudents,
@@ -177,6 +103,8 @@ const getDashboardStats =
       });
     }
   };
+
+
 
 // ======================
 // EXPORTS

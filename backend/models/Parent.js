@@ -16,7 +16,9 @@ const parentSchema =
 
         required: true,
 
-        trim: true
+        trim: true,
+
+        index: true
       },
 
       // ======================
@@ -33,6 +35,24 @@ const parentSchema =
       },
 
       motherName: {
+
+        type: String,
+
+        default: "",
+
+        trim: true
+      },
+
+      fatherOccupation: {
+
+        type: String,
+
+        default: "",
+
+        trim: true
+      },
+
+      motherOccupation: {
 
         type: String,
 
@@ -71,6 +91,45 @@ const parentSchema =
       },
 
       // ======================
+      // ADDRESS
+      // ======================
+
+      address: {
+
+        type: String,
+
+        default: ""
+      },
+
+      city: {
+
+        type: String,
+
+        default: ""
+      },
+
+      state: {
+
+        type: String,
+
+        default: ""
+      },
+
+      pincode: {
+
+        type: String,
+
+        default: ""
+      },
+
+      country: {
+
+        type: String,
+
+        default: "India"
+      },
+
+      // ======================
       // CHILDREN
       // ======================
 
@@ -86,8 +145,15 @@ const parentSchema =
       ],
 
       // ======================
-      // PASSWORD SECURITY
+      // PORTAL SETTINGS
       // ======================
+
+      portalEnabled: {
+
+        type: Boolean,
+
+        default: true
+      },
 
       mustChangePassword: {
 
@@ -95,6 +161,17 @@ const parentSchema =
 
         default: true
       },
+
+      lastLogin: {
+
+        type: Date,
+
+        default: null
+      },
+
+      // ======================
+      // PASSWORD RESET
+      // ======================
 
       resetOtp: {
 
@@ -111,7 +188,25 @@ const parentSchema =
       },
 
       // ======================
-      // ACCOUNT STATUS
+      // ACCOUNT LOCK
+      // ======================
+
+      accountLocked: {
+
+        type: Boolean,
+
+        default: false
+      },
+
+      accountLockedReason: {
+
+        type: String,
+
+        default: ""
+      },
+
+      // ======================
+      // STATUS
       // ======================
 
       status: {
@@ -122,10 +217,16 @@ const parentSchema =
 
           "active",
 
-          "inactive"
+          "inactive",
+
+          "blocked",
+
+          "archived"
         ],
 
-        default: "active"
+        default: "active",
+
+        index: true
       }
     },
 
@@ -139,17 +240,33 @@ const parentSchema =
 // INDEXES
 // ======================
 
+parentSchema.index(
+
+  {
+
+    schoolId: 1,
+
+    email: 1
+  },
+
+  {
+
+    unique: true
+  }
+);
+
 parentSchema.index({
 
   schoolId: 1,
 
-  email: 1
+  mobile: 1
+});
 
-},
+parentSchema.index({
 
-{
+  schoolId: 1,
 
-  unique: true
+  status: 1
 });
 
 // ======================

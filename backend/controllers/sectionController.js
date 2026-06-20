@@ -10,6 +10,11 @@ const Subject =
 const Student =
   require("../models/Student");
 
+  const AcademicYear =
+require(
+  "../modules/academics/models/AcademicYear"
+);
+
 
 // ======================================================
 // CLEAN PAYLOAD
@@ -47,7 +52,6 @@ const cleanSectionPayload =
     return payload;
   };
 
-
 // ======================================================
 // GET ALL CLASSES / SECTIONS
 // ======================================================
@@ -57,12 +61,25 @@ const getSections =
 
     try {
 
+      const activeYear =
+        await AcademicYear.findOne({
+
+          schoolId:
+            req.user.schoolId,
+
+          isActive: true,
+
+          isDeleted: false,
+        });
+
       const sections =
         await Section.find({
 
           schoolId:
             req.user.schoolId,
 
+          academicYear:
+            activeYear?.name,
         })
 
           .populate(
@@ -103,7 +120,6 @@ const getSections =
             className: 1,
           });
 
-
       const enrichedSections =
         await Promise.all(
 
@@ -120,7 +136,6 @@ const getSections =
                     section._id,
                 });
 
-
               return {
 
                 ...section.toObject(),
@@ -132,10 +147,12 @@ const getSections =
           )
         );
 
-
       res.status(200).json({
 
         success: true,
+
+        activeYear:
+          activeYear?.name,
 
         sections:
           enrichedSections,
@@ -159,7 +176,6 @@ const getSections =
       });
     }
   };
-
 
 // ======================================================
 // GET SINGLE SECTION
@@ -347,6 +363,17 @@ const addSection =
         req.body
       );
 
+      const activeYear =
+await AcademicYear.findOne({
+
+  schoolId:
+    req.user.schoolId,
+
+  isActive: true,
+
+  isDeleted: false
+});
+
 
       // ======================================================
       // VALIDATION
@@ -381,14 +408,21 @@ const addSection =
       // DUPLICATE CHECK
       // ======================================================
 
-      const exists =
-        await Section.findOne({
+     const exists =
+await Section.findOne({
 
-          schoolId:
-            req.user.schoolId,
+  schoolId:
+    req.user.schoolId,
 
-          displayName,
-        });
+  academicYear:
+    academicYear ||
+
+    activeYear?.name ||
+
+    "",
+
+  displayName,
+});
 
 
       if (exists) {
@@ -428,10 +462,12 @@ const addSection =
 
           roomNumber:
             roomNumber || "",
+academicYear:
+  academicYear ||
 
-          academicYear:
-            academicYear || "2025-26",
+  activeYear?.name ||
 
+  "",
           classType:
             classType || "Regular",
 

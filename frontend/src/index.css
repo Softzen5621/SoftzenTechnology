@@ -201,3 +201,53 @@ body {
 
   overflow-x: hidden;
 }
+
+/* =========================
+   PRINT STYLES
+========================= */
+
+@media print {
+
+  /* Sidebar Hide */
+
+  aside,
+  nav {
+
+    display: none !important;
+  }
+
+  /* Dashboard Header Hide */
+
+  header {
+
+    display: none !important;
+  }
+
+  /* Buttons Hide */
+
+  button {
+
+    display: none !important;
+  }
+
+  /* Full Width TC */
+
+  body {
+
+    background: white !important;
+  }
+
+  #root {
+
+    width: 100% !important;
+  }
+  @media print {
+
+  .print-hide {
+
+    display: none !important;
+  }
+
+}
+
+}

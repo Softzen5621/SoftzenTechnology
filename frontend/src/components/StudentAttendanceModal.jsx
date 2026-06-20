@@ -12,16 +12,19 @@ from "./AttendanceCalendar";
 // ======================================================
 // STUDENT ATTENDANCE MODAL
 // ======================================================
-
 export default function StudentAttendanceModal({
 
   student,
 
   summary,
 
+  attendanceDate,
+
   onClose
 
-}) {
+})
+
+{
   // ======================================================
   // STATES
   // ======================================================
@@ -40,15 +43,12 @@ export default function StudentAttendanceModal({
   // ======================================================
   // FETCH DATA
   // ======================================================
+useEffect(()=>{
+ if(student){
+   fetchAttendance();
+ }
+},[student]);
 
-  useEffect(() => {
-
-    if (student) {
-
-      fetchAttendance();
-    }
-
-  }, [student]);
 
   // ======================================================
   // FETCH
@@ -60,22 +60,12 @@ export default function StudentAttendanceModal({
       try {
 
         setLoading(true);
-
-        const today =
-          new Date();
-
-        const month =
-          today.getMonth() + 1;
-
-        const year =
-          today.getFullYear();
-
         // MONTHLY
 
         const res =
           await API.get(
 
-            `/attendance/monthly?studentId=${student._id}&month=${month}&year=${year}`
+            `/attendance/history?studentId=${student._id}`
           );
 
         // HOLIDAYS
@@ -89,6 +79,8 @@ export default function StudentAttendanceModal({
 
           res.data.attendance || []
         );
+
+
 
         setStudentSummary(
 
@@ -217,7 +209,7 @@ export default function StudentAttendanceModal({
                 text-white
               "
             >
-              Loading...
+            No attendance records found
             </div>
           )
         }
@@ -270,7 +262,7 @@ export default function StudentAttendanceModal({
                 />
 
                 <Card
-                  title="Total Days"
+                  title="Working Days"
                   value={studentSummary.totalDays}
                   color="blue"
                 />
@@ -386,11 +378,8 @@ export default function StudentAttendanceModal({
                               "
                             >
                               {
-
-                                new Date(
-
-                                  item.attendanceDate
-                                ).toLocaleDateString()
+item.attendanceDateString
+                              
                               }
                             </p>
 

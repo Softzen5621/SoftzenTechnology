@@ -103,9 +103,7 @@ export default function Sections() {
 
     try {
 
-      const res =
-        await API.get("/students");
-
+     const res = await API.get("/students?page=1&limit=5000");
 
       if (
         Array.isArray(
@@ -543,20 +541,14 @@ export default function Sections() {
               const classSections =
                 classData.sections;
 
-
-              const classStudents =
-                students.filter(
-                  (student) =>
-
-                    classSections.some(
-                      (sec) =>
-
-                        sec._id ===
-
-                        student.sectionId?._id
-                    )
-                ).length;
-
+const classStudents =
+  students.filter((student) =>
+    classSections.some(
+      (sec) =>
+        String(sec._id) ===
+        String(student.sectionId?._id || student.sectionId)
+    )
+  ).length;
 
               return (
 
@@ -683,17 +675,11 @@ export default function Sections() {
                               ) => {
 
                                 const sectionStudents =
-                                  students.filter(
-                                    (
-                                      student
-                                    ) =>
-
-                                      student
-                                        .sectionId
-                                        ?._id ===
-                                      section._id
-                                  ).length;
-
+  students.filter(
+    (student) =>
+      String(student.sectionId?._id || student.sectionId) ===
+      String(section._id)
+  ).length;
 
                                 return (
 

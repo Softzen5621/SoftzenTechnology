@@ -1,31 +1,56 @@
-export default function Dashboard() {
-  const stats = [
-    {
-      title: "Total Students",
-      value: "2,540",
-      growth: "+12%",
-      icon: "🎓"
-    },
-    {
-      title: "Teachers",
-      value: "145",
-      growth: "+4%",
-      icon: "👨‍🏫"
-    },
-    {
-      title: "Fees Collected",
-      value: "₹18.4L",
-      growth: "+18%",
-      icon: "💰"
-    },
-    {
-      title: "Pending Fees",
-      value: "₹2.1L",
-      growth: "-8%",
-      icon: "📌"
-    }
-  ];
+import { useEffect, useState } from "react";
+import API from "../../services/api";
 
+
+export default function Dashboard() {
+
+  const [dashboardData, setDashboardData] = useState({
+  totalStudents: 0,
+  totalTeachers: 0,
+});
+
+useEffect(() => {
+  fetchDashboard();
+}, []);
+
+const fetchDashboard = async () => {
+  try {
+    const { data } = await API.get("/dashboard/stats");
+
+    setDashboardData({
+      totalStudents: data?.stats?.totalStudents || 0,
+      totalTeachers: data?.stats?.totalTeachers || 0,
+    });
+  } catch (error) {
+    console.error("Dashboard Error:", error);
+  }
+};
+ const stats = [
+  {
+    title: "Total Students",
+    value: dashboardData.totalStudents,
+    growth: "+12%",
+    icon: "🎓"
+  },
+  {
+    title: "Teachers",
+    value: dashboardData.totalTeachers,
+    growth: "+4%",
+    icon: "👨‍🏫"
+  },
+  {
+    title: "Fees Collected",
+    value: "₹18.4L",
+    growth: "+18%",
+    icon: "💰"
+  },
+  {
+    title: "Pending Fees",
+    value: "₹2.1L",
+    growth: "-8%",
+    icon: "📌"
+  }
+];
   const activities = [
     "Rahul Sharma paid ₹12,000 fees",
     "Class 10A attendance updated",

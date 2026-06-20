@@ -1,4 +1,17 @@
 import {
+  Bell,
+  LayoutDashboard,
+  CalendarCheck,
+  BookOpen,
+  GraduationCap,
+  Clock3,
+  FileText,
+  User,
+  LogOut
+} from "lucide-react";
+
+
+import {
   Outlet,
   NavLink
 } from "react-router-dom";
@@ -61,12 +74,13 @@ export default function TeacherLayout() {
 
   const teacherName =
 
-    authData?.fullName ||
+  authData?.user?.name ||
 
-    authData?.name ||
+  authData?.fullName ||
 
-    "Teacher";
+  authData?.name ||
 
+  "Teacher";  
   // ======================================================
   // STATES
   // ======================================================
@@ -102,7 +116,7 @@ export default function TeacherLayout() {
     setLoading
 
   ] = useState(false);
-
+const [sidebarOpen, setSidebarOpen] = useState(false);
   // ======================================================
   // FETCH NOTIFICATIONS
   // ======================================================
@@ -476,52 +490,43 @@ export default function TeacherLayout() {
   // ======================================================
   // MENU
   // ======================================================
-
-  const teacherMenu = [
-
-    {
-      name: "Dashboard",
-      path: "/teacher/dashboard",
-      icon: "📊"
-    },
-
-    {
-      name: "Attendance",
-      path: "/teacher/attendance",
-      icon: "📅"
-    },
-
-    {
-      name: "Homework",
-      path: "/teacher/homework",
-      icon: "📚"
-    },
-
-    {
-      name: "My Classes",
-      path: "/teacher/classes",
-      icon: "🏫"
-    },
-
-    {
-      name: "Timetable",
-      path: "/teacher/timetable",
-      icon: "⏰"
-    },
-
-    {
-      name: "Leave",
-      path: "/teacher/leave",
-      icon: "📝"
-    },
-
-    {
-      name: "Profile",
-      path: "/teacher/profile",
-      icon: "👤"
-    }
-  ];
-
+const teacherMenu = [
+  {
+    name: "Dashboard",
+    path: "/teacher/dashboard",
+    icon: <LayoutDashboard size={18} />
+  },
+  {
+    name: "Attendance",
+    path: "/teacher/attendance",
+    icon: <CalendarCheck size={18} />
+  },
+  {
+    name: "Homework",
+    path: "/teacher/homework",
+    icon: <BookOpen size={18} />
+  },
+  {
+    name: "My Classes",
+    path: "/teacher/classes",
+    icon: <GraduationCap size={18} />
+  },
+  // {
+  //   name: "Timetable",
+  //   path: "/teacher/timetable",
+  //   icon: <Clock3 size={18} />
+  // },
+  // {
+  //   name: "Leave",
+  //   path: "/teacher/leave",
+  //   icon: <FileText size={18} />
+  // },
+  // {
+  //   name: "Profile",
+  //   path: "/teacher/profile",
+  //   icon: <User size={18} />
+  // }
+];
   // ======================================================
   // LOGOUT
   // ======================================================
@@ -543,36 +548,66 @@ export default function TeacherLayout() {
   return (
 
     <div
-      className="
-        flex
-        min-h-screen
-        bg-slate-950
-        text-white
-      "
-    >
+  className="
+    flex
+    min-h-screen
+    bg-slate-950
+    text-white
+  "
+>
 
       {/* SIDEBAR */}
 
       <aside
-        className="
-          w-[280px]
-          bg-black/30
-          border-r
-          border-white/10
-          backdrop-blur-xl
-          p-6
-          flex
-          flex-col
-        "
-      >
+  className={`
+    fixed
+    top-0
+    left-0
+    h-screen
+    w-[220px]
+    bg-black/95
+    border-r
+    border-white/10
+    backdrop-blur-xl
+    p-6
+    flex
+    flex-col
+    justify-between
+    z-50
+    transition-transform
+    duration-300
+
+    ${
+      sidebarOpen
+        ? "translate-x-0"
+        : "-translate-x-full lg:translate-x-0"
+    }
+  `}
+>
 
         {/* LOGO */}
-
+<div>
         <div
           className="
             mb-10
           "
         >
+          <button
+  onClick={() => setSidebarOpen(false)}
+  className="
+    lg:hidden
+    absolute
+    top-4
+    right-4
+    text-xl
+    bg-white/10
+    rounded-lg
+    px-3
+    py-1
+  "
+>
+  ✕
+</button>
 
           <h1
             className="
@@ -588,26 +623,35 @@ export default function TeacherLayout() {
             SOFTZEN
           </h1>
 
-          <p
-            className="
-              text-slate-400
-              mt-2
-            "
-          >
-            Teacher ERP Panel
-          </p>
+          <div
+  className="
+    mt-4
+    p-3
+    rounded-xl
+    bg-white/5
+    border
+    border-white/10
+  "
+>
+  <p className="font-semibold">
+    {teacherName}
+  </p>
+
+  <p className="text-xs text-slate-400">
+    Teacher ERP Panel
+  </p>
+</div>
 
         </div>
 
         {/* MENU */}
 
         <nav
-          className="
-            flex-1
-            space-y-3
-          "
-        >
-
+  className="
+    space-y-3
+    mt-8
+  "
+>
           {
 
             teacherMenu.map(
@@ -648,8 +692,9 @@ export default function TeacherLayout() {
 
                           ? `
                             bg-gradient-to-r
-                            from-blue-600
-                            to-cyan-500
+                            from-cyan-500
+to-blue-600
+shadow-cyan-500/20
                             border-transparent
                             shadow-lg
                           `
@@ -682,84 +727,128 @@ export default function TeacherLayout() {
           }
 
         </nav>
+        </div>
 
         {/* LOGOUT */}
 
-        <button
+       <div className="mt-auto pt-4 border-t border-white/10">
 
-          onClick={handleLogout}
+  
+ <button
+  onClick={handleLogout}
+  className="
+    w-full
+    flex
+    items-center
+    justify-center
+    gap-2
+    p-3
+    rounded-xl
+    bg-red-500/10
+    border
+    border-red-500/20
+    text-red-400
+    hover:bg-red-500/20
+    transition
+  "
+>
+  <LogOut size={18} />
+  Logout
+</button>
 
-          className="
-            mt-6
-            w-full
-            p-4
-            rounded-2xl
-            bg-red-500/10
-            border
-            border-red-500/20
-            text-red-400
-            hover:bg-red-500/20
-            transition
-          "
-        >
-
-          Logout
-
-        </button>
-
+</div>
       </aside>
+
+      {
+  sidebarOpen && (
+    <div
+      onClick={() => setSidebarOpen(false)}
+      className="
+        fixed
+        inset-0
+        bg-black/50
+        z-40
+        lg:hidden
+      "
+    />
+  )
+}
 
       {/* MAIN */}
 
-      <main
-        className="
-          flex-1
-          p-8
-          overflow-auto
-        "
-      >
+ <main
+  className="
+  flex-1
+  lg:ml-[220px]
+  p-4 md:p-8
+  overflow-auto
+"
+>
 
         {/* TOPBAR */}
 
         <div
-          className="
-            flex
-            items-center
-            justify-between
-            mb-8
-          "
-        >
+  className="
+    flex
+    flex-col
+    md:flex-row
+    md:items-center
+    justify-between
+    mb-8
+    gap-4
+  "
+>
+<div className="flex items-center gap-3">
 
-          <div>
+  <button
+    onClick={() => setSidebarOpen(true)}
+    className="
+      lg:hidden
+      text-xl
+      px-3
+      py-2
+      rounded-xl
+      bg-white/10
+      border
+      border-white/10
+    "
+  >
+    ☰
+  </button>
 
-            <h2
-              className="
-                text-4xl
-                font-black
-              "
-            >
-              Teacher Portal
-            </h2>
+<div>
+  <h2
+    className="
+      text-2xl
+      md:text-4xl
+      font-black
+    "
+  >
+    Welcome back,
+    <span className="text-cyan-400 ml-2">
+      {teacherName}
+    </span>
+  </h2>
 
-            <p
-              className="
-                text-slate-400
-                mt-2
-              "
-            >
-              Welcome back 👋
-            </p>
-
-          </div>
+  <p
+    className="
+      text-slate-400
+      mt-2
+    "
+  >
+    Academic Management Portal
+  </p>
+</div>
+</div>
 
           {/* RIGHT */}
 
           <div
             className="
-              flex
-              items-center
-              gap-4
-            "
+  flex
+  items-center
+  gap-2
+"
           >
 
             {/* NOTIFICATION */}
@@ -784,8 +873,7 @@ export default function TeacherLayout() {
 
                 className="
                   relative
-                  w-14
-                  h-14
+                  w-10 h-10 md:w-14 md:h-14
                   rounded-2xl
                   bg-white/5
                   border
@@ -799,7 +887,7 @@ export default function TeacherLayout() {
                 "
               >
 
-                🔔
+                <Bell size={22} />
 
                 {
 
@@ -1177,20 +1265,48 @@ export default function TeacherLayout() {
 
             {/* USER */}
 
-            <div
-              className="
-                px-5
-                py-3
-                rounded-2xl
-                bg-white/5
-                border
-                border-white/10
-              "
-            >
+           <div
+  className="
+    flex
+    items-center
+    gap-3
+    px-4
+    py-2
+    rounded-2xl
+    bg-white/5
+    border
+    border-white/10
+  "
+>
 
-              {teacherName}
+  <div
+    className="
+      w-10
+      h-10
+      rounded-full
+      bg-gradient-to-r
+      from-cyan-500
+      to-blue-600
+      flex
+      items-center
+      justify-center
+      font-bold
+    "
+  >
+    {teacherName?.charAt(0)}
+  </div>
 
-            </div>
+  <div className="hidden md:block">
+    <p className="font-semibold">
+      {teacherName}
+    </p>
+
+    <p className="text-xs text-slate-400">
+      Teacher
+    </p>
+  </div>
+
+</div>
 
           </div>
 

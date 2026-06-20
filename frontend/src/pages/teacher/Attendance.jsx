@@ -1,11 +1,22 @@
 import {
+  LayoutDashboard,
+  CalendarCheck,
+  BookOpen,
+  GraduationCap,
+  Clock3,
+  FileText,
+  User,
+  LogOut
+} from "lucide-react";
+
+import {
   useEffect,
   useState
 } from "react";
 
 import API
 from "../../services/api";
-
+import "./TeacherAttendance.css";
 import StudentAttendanceModal
 from "../../components/StudentAttendanceModal";
 
@@ -55,6 +66,7 @@ const [isHoliday, setIsHoliday] =
 const [holidayData, setHolidayData] =
   useState(null);
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [
     attendanceAlreadyMarked,
     setAttendanceAlreadyMarked
@@ -209,6 +221,7 @@ const [holidayData, setHolidayData] =
             classes[0],
             attendanceDate
           );
+          setLoading(false);
         }
 
       } catch (err) {
@@ -241,35 +254,11 @@ const [holidayData, setHolidayData] =
           fetchedStudents
         );
 
-        const defaultAttendance = {};
-
-        fetchedStudents.forEach(
-          (student) => {
-
-            defaultAttendance[
-              student._id
-            ] = {
-
-              status:
-                "Present",
-
-              absentReason:
-                ""
-            };
-          }
-        );
-
-        setAttendance(
-          defaultAttendance
-        );
 
       } catch (err) {
 
         console.log(err);
 
-      } finally {
-
-        setLoading(false);
       }
     };
 
@@ -544,7 +533,7 @@ const checkHoliday =
         console.log(err);
 
         alert(
-          "Failed to save attendance ❌"
+          "Absent reason"
         );
 
       } finally {
@@ -600,53 +589,72 @@ const checkHoliday =
   // UI
   // ======================================================
 
-  return (
+ return (
 
-    <div
-      className="
-        space-y-8
-      "
-    >
-
+ <div
+  className="
+    space-y-8
+  "
+>
       {/* ======================================================
           HEADER
       ====================================================== */}
-
-      <div
-        className="
-          flex
-          flex-col
-          xl:flex-row
-          xl:items-start
-          xl:justify-between
-          gap-6
-        "
-      >
+<div
+  className="
+    attendance-header
+    flex
+    flex-col
+    xl:flex-row
+    xl:items-start
+    xl:justify-between
+    gap-6
+  "
+>
 
         {/* LEFT */}
 
         <div>
 
           <h1
-            className="
-              text-4xl
-              font-black
-              text-white
-            "
-          >
+  className="
+    text-2xl
+    md:text-4xl
+    font-black
+    text-white
+  "
+>
             Attendance Management
           </h1>
 
-          <p
-            className="
-              text-slate-400
-              mt-2
-            "
-          >
-            Mark class attendance
-          </p>
+        <div
+  className="
+    attendance-class-badge
+    hidden
+    md:inline-flex
+    items-center
+    gap-2
+    mt-3
+    px-4
+    py-2
+    rounded-xl
+    bg-cyan-500/10
+    border
+    border-cyan-500/20
+    text-cyan-300
+    text-sm
+    font-semibold
+  "
+>
+  🎓 {selectedClass?.displayName}
+  <span className="text-slate-400">
+    • {students.length} Students
+  </span>
+</div>
+       
+
 
         </div>
+
 
         {/* RIGHT PANEL */}
 
@@ -671,88 +679,216 @@ xl:w-auto
               flex-wrap
               justify-end
             "
+          
           >
-
-            {/* DATE */}
-
-            <input   type="date"
-            style={{
-  colorScheme: "dark"
-}}
             
-             
+      {/* ======================================================
+          QUICK ACTIONS
+      ====================================================== */}
+<div className="attendance-top-controls">
 
-              value={attendanceDate}
 
-              onChange={async (e) => {
+{
+  !isHoliday && (
+     <div
+  className="
+    attendance-actions
+    flex
+    flex-wrap
+    gap-4
+  "
+>
 
-                const newDate =
-                  e.target.value;
+      </div>)}
 
-                setAttendanceDate(
-                  newDate
-                );
-                setAttendance({});
-                await checkHoliday(
-  newDate
-);
 
-                if (!selectedClass) return;
+              {/* ======================================================
+          SEARCH
+      ====================================================== */}
+<input
+  type="text"
+  placeholder="Search student..."
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  className="
+    attendance-search
+    w-full
+    md:w-[300px]
+    px-5
+    py-4
+    rounded-2xl
+    bg-white/5
+    border
+    border-white/10
+    text-white
+    outline-none
+  "
+/>
 
-                await loadExistingAttendance(
-                  selectedClass,
-                  newDate
-                );
+    <button
 
-                await checkExistingAttendance(
-                  selectedClass,
-                  newDate
-                );
-              }}
+          onClick={() => {
 
-              className="
-  px-5
-  py-3
-  rounded-2xl
-  bg-[#0F172A]
-  border
-  border-cyan-500/20
-  text-white
-  outline-none
-  shadow-lg
-  hover:border-cyan-400
-  focus:border-cyan-400
-  transition-all
-  cursor-pointer
-"
-            />
+            const updated = {};
 
-            {/* SAVE BUTTON */}
+            students.forEach(
+              (student) => {
+
+                updated[
+                  student._id
+                ] = {
+
+                  status:
+                    "Present",
+
+                  absentReason:
+                    ""
+                };
+              }
+            );
+
+            setAttendance(
+              updated
+            );
+          }}
+
+          className="
+            px-6
+            py-3
+            rounded-2xl
+            bg-green-600
+            hover:bg-green-700
+            transition
+            font-semibold
+          "
+        >
+
+          All Present
+
+        </button>
+
+        <button
+
+          onClick={() => {
+
+            const updated = {};
+
+            students.forEach(
+              (student) => {
+
+                updated[
+                  student._id
+                ] = {
+
+                  status:
+                    "Absent",
+
+                  absentReason:
+                    ""
+                };
+              }
+            );
+
+            setAttendance(
+              updated
+            );
+          }}
+
+          className="
+            px-6
+            py-3
+            rounded-2xl
+            bg-red-600
+            hover:bg-red-700
+            transition
+            font-semibold
+          "
+        >
+
+          All Absent
+
+        </button>
+
+ {/* DATE */}
+
+<input
+  type="date"
+
+  value={attendanceDate}
+
+  onChange={async (e) => {
+
+    const newDate =
+      e.target.value;
+
+    setAttendanceDate(
+      newDate
+    );
+
+    setAttendance({});
+
+    await checkHoliday(
+      newDate
+    );
+
+    if (!selectedClass) return;
+
+    await loadExistingAttendance(
+      selectedClass,
+      newDate
+    );
+
+    await checkExistingAttendance(
+      selectedClass,
+      newDate
+    );
+
+  }}
+
+  style={{
+    colorScheme: "dark"
+  }}
+
+  className="
+    attendance-date
+    px-5
+    py-3
+    rounded-2xl
+    bg-[#0F172A]
+    border
+    border-cyan-500/20
+    text-white
+    outline-none
+    shadow-lg
+    hover:border-cyan-400
+    focus:border-cyan-400
+    transition-all
+    cursor-pointer
+  "
+/>
+
+{/* SAVE BUTTON */}
 
        {
   !isHoliday && (
-
 <button
-              onClick={
-                submitAttendance
-              }
-
-              disabled={saving}
-
-              className="
-                px-10
-py-3.5
-                rounded-2xl
-                bg-gradient-to-r
-                from-blue-600
-                to-cyan-500
-                text-white
-                font-bold
-                shadow-xl
-                hover:scale-[1.02]
-                transition-all
-              "
-            >
+  onClick={submitAttendance}
+  disabled={saving}
+  className="
+    attendance-save
+    px-10
+    py-3.5
+    rounded-2xl
+    bg-gradient-to-r
+    from-blue-600
+    to-cyan-500
+    text-white
+    font-bold
+    shadow-xl
+    hover:scale-[1.02]
+    transition-all
+  "
+>
 
               {
 
@@ -762,25 +898,23 @@ py-3.5
 
                   : attendanceAlreadyMarked
 
-                  ? "🔄 Update Attendance"
+                  ? "Save"
 
-                  : "✅ Save Attendance"
+                  : " Save Attendance"
               }
 
             </button>)}
-
-          </div>
-
-          {/* STATUS */}
-
-          <div
-            className="
-              flex
-              flex-col
-              items-end
-              gap-2
-            "
-          >
+</div>
+             {/* STATUS */}
+<div
+  className="
+    attendance-status
+    flex
+    flex-col
+    items-end
+    gap-2
+  "
+>
 
             {
 
@@ -831,6 +965,10 @@ whitespace-nowrap
 
           </div>
 
+
+          </div>
+
+         
         </div>
 
       </div>
@@ -899,53 +1037,12 @@ whitespace-nowrap
 
     </div>
   )
-}
-      {/* ======================================================
-          SEARCH
-      ====================================================== */}
-
-      <input
-        type="text"
-
-        placeholder="
-          Search student...
-        "
-
-        value={search}
-
-        onChange={(e) =>
-
-          setSearch(
-            e.target.value
-          )
-        }
-
-        className="
-          w-full
-          md:w-[350px]
-          px-5
-          py-4
-          rounded-2xl
-          bg-white/5
-          border
-          border-white/10
-          text-white
-          outline-none
-        "
-      />
-
-      
+}      
       {/* ======================================================
           CLASS BUTTONS
       ====================================================== */}
 
-      <div
-        className="
-          flex
-          flex-wrap
-          gap-4
-        "
-      >
+     <div className="hidden">
 
         {
 
@@ -955,15 +1052,13 @@ whitespace-nowrap
               <button
                 key={classItem.classId}
 
-               onClick={async () => {
+            onClick={async () => {
 
-  setSelectedClass(
-    classItem
-  );
+  setLoading(true);
 
-  await fetchStudents(
-    classItem
-  );
+  setSelectedClass(classItem);
+
+  await fetchStudents(classItem);
 
   await loadExistingAttendance(
     classItem,
@@ -974,8 +1069,9 @@ whitespace-nowrap
     classItem,
     attendanceDate
   );
-}}
 
+  setLoading(false);
+}}
                 className={
 
                   `
@@ -1014,19 +1110,21 @@ whitespace-nowrap
         }
 
       </div>
-{/* SUMMARY */}
+
+      {/* SUMMARY */}
 
 {
   students.length > 0 && (
 
     <div
-      className="
-        grid
-        grid-cols-2
-        md:grid-cols-5
-        gap-4
-      "
-    >
+  className="
+    attendance-summary
+    grid
+    grid-cols-2
+    md:grid-cols-5
+    gap-3
+  "
+>
 
       <SummaryCard
         title="Total"
@@ -1072,120 +1170,22 @@ whitespace-nowrap
   )
 }
 
-      {/* ======================================================
-          QUICK ACTIONS
-      ====================================================== */}
-{
-  !isHoliday && (
-      <div
-        className="
-          flex
-          flex-wrap
-          gap-4
-        "
-      >
-
-        <button
-
-          onClick={() => {
-
-            const updated = {};
-
-            students.forEach(
-              (student) => {
-
-                updated[
-                  student._id
-                ] = {
-
-                  status:
-                    "Present",
-
-                  absentReason:
-                    ""
-                };
-              }
-            );
-
-            setAttendance(
-              updated
-            );
-          }}
-
-          className="
-            px-6
-            py-3
-            rounded-2xl
-            bg-green-600
-            hover:bg-green-700
-            transition
-            font-semibold
-          "
-        >
-
-          ✅ Mark All Present
-
-        </button>
-
-        <button
-
-          onClick={() => {
-
-            const updated = {};
-
-            students.forEach(
-              (student) => {
-
-                updated[
-                  student._id
-                ] = {
-
-                  status:
-                    "Absent",
-
-                  absentReason:
-                    ""
-                };
-              }
-            );
-
-            setAttendance(
-              updated
-            );
-          }}
-
-          className="
-            px-6
-            py-3
-            rounded-2xl
-            bg-red-600
-            hover:bg-red-700
-            transition
-            font-semibold
-          "
-        >
-
-          ❌ Mark All Absent
-
-        </button>
-
-      </div>)}
 
       {/* ======================================================
           TABLE
       ====================================================== */}
 {
-  !isHoliday && ( 
-  <div
-        className="
-          bg-white/5
-          border
-          border-white/10
-          rounded-3xl
-          overflow-hidden
-        "
-      >
+  !isHoliday && (
 
+  <div
+  className="
+    bg-white/5
+    border
+    border-white/10
+    rounded-3xl
+    overflow-x-auto
+  "
+>
         {
 
           loading && (
@@ -1224,11 +1224,9 @@ whitespace-nowrap
           !loading &&
           filteredStudents.length > 0 && (
 
-            <table
-              className="
-                w-full
-              "
-            >
+          
+  <table className="w-full">
+
 
               <thead
                 className="
@@ -1256,14 +1254,16 @@ whitespace-nowrap
                     Status
                   </th>
 
-                 <th
-  className="
-    text-left
-    p-5
-    w-[35%]
-  "
+                <th
+ className="
+   hidden
+   lg:table-cell
+   text-left
+   p-5
+   w-[35%]
+ "
 >
-  Reason
+Reason
 </th>
 
                 </tr>
@@ -1316,12 +1316,14 @@ whitespace-nowrap
                           >
 
                             <span
-                              className="
-                                text-cyan-400
-                                text-sm
-                                font-semibold
-                              "
-                            >
+ className="
+   hidden
+   md:block
+   text-cyan-400
+   text-sm
+   font-semibold
+ "
+>
                               {
                                 student.studentId
                               }
@@ -1342,119 +1344,116 @@ whitespace-nowrap
                           </div>
 
                         </td>
+{/* STATUS */}
 
-                        {/* STATUS */}
+<td className="p-3">
 
-                        <td
-                          className="
-                            p-5
-                          "
-                        >
+ <div
+  className="
+    student-status-grid
+    grid
+    grid-cols-2
+    gap-2
+    2xl:grid-cols-4
+  "
+>
 
-                          <div
-                            className="
-                              flex
-                              gap-3
-                              flex-wrap
-                            "
-                          >
+    {[
+      {
+        label: "Present",
+        value: "Present"
+      },
+      {
+        label: "Absent",
+        value: "Absent"
+      },
+      {
+        label: "Late",
+        value: "Late"
+      },
+      {
+        label: "Half Day",
+        value: "Half Day"
+      }
+    ].map((status) => (
 
-                            {
+      <button
+  key={status.label}
+  onClick={() =>
+    handleStatusChange(
+      student._id,
+      status.value
+    )
+  }
+  className={`
+    w-12
+    h-12
 
-                              [
-                                {
-                                  label: "Present",
-                                  value: "Present"
-                                },
+    2xl:min-w-[95px]
+2xl:h-11
+2xl:px-4
 
-                                {
-                                  label: "Absent",
-                                  value: "Absent"
-                                },
+    rounded-xl
+    border
+    transition
+    font-bold
+    text-sm
 
-                                {
-                                  label: "Late",
-                                  value: "Late"
-                                },
+    flex
+    items-center
+    justify-center
 
-                                {
-                                  label: "Half Day",
-                                  value: "Half Day"
-                                }
-                              ].map(
-                                (status) => (
+    ${
+      attendance[student._id]?.status === status.value
 
-                                  <button
-                                    key={status.label}
+        ? status.value === "Present"
+          ? "bg-green-600 border-green-600"
 
-                                    onClick={() =>
+          : status.value === "Absent"
+          ? "bg-red-600 border-red-600"
 
-                                      handleStatusChange(
+          : status.value === "Late"
+          ? "bg-yellow-500 border-yellow-500 text-black"
 
-                                        student._id,
+          : "bg-purple-600 border-purple-600"
 
-                                        status.value
-                                      )
-                                    }
+        : "bg-white/5 border-white/10"
+    }
+  `}
+>
 
-                                    className={
+  <span className="2xl:hidden">
+    {
+      status.value === "Present"
+        ? "P"
+        : status.value === "Absent"
+        ? "A"
+        : status.value === "Late"
+        ? "L"
+        : "H"
+    }
+  </span>
+<span className="hidden 2xl:inline">
+    {status.label}
+  </span>
 
-                                      `
-                                        px-4
-                                        py-2
-                                        rounded-xl
-                                        text-sm
-                                        border
-                                        transition
+</button>
 
-                                        ${
-                                          attendance[
-                                            student._id
-                                          ]?.status ===
-                                          status.value
+    ))}
 
-                                            ? status.value === "Present"
+  </div>
 
-                                              ? "bg-green-600 border-green-600"
-
-                                              : status.value === "Absent"
-
-                                              ? "bg-red-600 border-red-600"
-
-                                              : status.value === "Late"
-
-                                              ? "bg-yellow-500 border-yellow-500 text-black"
-
-                                              : "bg-purple-600 border-purple-600"
-
-                                            : `
-                                              bg-white/5
-                                              border-white/10
-                                            `
-                                        }
-                                      `
-                                    }
-                                  >
-
-                                    {
-                                      status.label
-                                    }
-
-                                  </button>
-                                )
-                              )
-                            }
-
-                          </div>
-
-                        </td>
+</td>
                         {/* REASON */}
 
-                        <td
-                          className="
-                            p-5
-                          "
-                        >
+   <td
+ className="
+   student-reason
+   hidden
+   lg:table-cell
+   p-5
+ "
+>
 
                           {
 
@@ -1514,6 +1513,7 @@ whitespace-nowrap
               </tbody>
 
             </table>
+            
           )
         }
 
@@ -1523,7 +1523,7 @@ whitespace-nowrap
       {
         showStudentModal && (
 
-          <StudentAttendanceModal
+        <StudentAttendanceModal
 
   student={
     selectedStudent
@@ -1531,6 +1531,10 @@ whitespace-nowrap
 
   summary={
     studentMonthlyData
+  }
+
+  attendanceDate={
+    attendanceDate
   }
 
   onClose={() => {
@@ -1544,6 +1548,9 @@ whitespace-nowrap
     );
   }}
 />
+
+
+
         )
       }
 
@@ -1589,7 +1596,7 @@ function SummaryCard({
       className={`
         border
         rounded-2xl
-        p-5
+        p-2 md:p-3
         ${colorClasses[color] || colorClasses.white}
       `}
     >
@@ -1605,7 +1612,7 @@ function SummaryCard({
 
       <h2
         className="
-          text-3xl
+          text-lg md:text-xl
           font-black
           mt-2
         "

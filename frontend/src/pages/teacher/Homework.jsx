@@ -1182,7 +1182,7 @@ const Homework =
                 `}
               >
 
-                🏫 Assign By Class
+                Assign By Class
 
               </button>
 
@@ -1224,7 +1224,7 @@ const Homework =
                 `}
               >
 
-                👨‍🎓 Assign Specific Students
+                Assign Specific Students
 
               </button>
 

@@ -30,12 +30,60 @@ const schoolSchema =
         trim: true
       },
 
+      lastAdmissionNumber: {
+  type: Number,
+  default: 0
+},
+
+lastTcNumber: {
+  type: Number,
+  default: 0
+},
+
       logo: {
 
         type: String,
 
         default: ""
       },
+
+      udiseCode: {
+  type: String,
+  default: ""
+},
+
+principalName: {
+  type: String,
+  default: ""
+},
+
+principalSignature: {
+  type: String,
+  default: ""
+},
+
+
+schoolSeal: {
+  type: String,
+  default: ""
+},
+
+tcPrefix: {
+  type: String,
+  default: "TC"
+},
+
+tcWatermark: {
+  type: Boolean,
+  default: true
+},
+
+
+
+tcQrVerification: {
+  type: Boolean,
+  default: true
+},
 
       email: {
 

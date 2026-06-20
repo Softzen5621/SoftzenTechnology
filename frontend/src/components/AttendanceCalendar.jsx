@@ -3,6 +3,7 @@ from "react-calendar";
 
 import "react-calendar/dist/Calendar.css";
 
+
 // ======================================================
 // ATTENDANCE CALENDAR
 // ======================================================
@@ -18,14 +19,31 @@ export default function AttendanceCalendar({
   // ======================================================
   // GET STATUS
   // ======================================================
+const formatLocalDate = (date) => {
+
+  const d = new Date(date);
+
+  const year = d.getFullYear();
+
+  const month =
+    String(
+      d.getMonth() + 1
+    ).padStart(2, "0");
+
+  const day =
+    String(
+      d.getDate()
+    ).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
 
   const getStatus =
     (date) => {
 
       const formatted =
-        new Date(date)
-          .toISOString()
-          .split("T")[0];
+  formatLocalDate(date);
 
       // HOLIDAY
 
@@ -33,20 +51,16 @@ export default function AttendanceCalendar({
         holidays.find(
           (item) =>
 
-            new Date(
-              item.startDate
-            )
-              .toISOString()
-              .split("T")[0]
+           formatLocalDate(
+  item.startDate
+)
 
             <= formatted &&
 
-            new Date(
-              item.endDate
-            )
-              .toISOString()
-              .split("T")[0]
-
+            formatLocalDate(
+  item.endDate
+)
+              
             >= formatted
         );
 
@@ -55,17 +69,16 @@ export default function AttendanceCalendar({
         return "Holiday";
       }
 
+
       // ATTENDANCE
 
       const attendance =
         attendanceRecords.find(
           (item) =>
 
-            new Date(
-              item.attendanceDate
-            )
-              .toISOString()
-              .split("T")[0]
+           formatLocalDate(
+  item.attendanceDate
+)
 
             === formatted
         );
@@ -205,16 +218,43 @@ export default function AttendanceCalendar({
       {/* CALENDAR */}
 
       <Calendar
+  className="
+    attendance-calendar
+  "
+  tileClassName={
+    tileClassName
+  }
 
-        className="
-          attendance-calendar
-        "
+  tileContent={({ date }) => {
 
-        tileClassName={
-          tileClassName
+    const status =
+      getStatus(date);
+
+    return (
+      <div
+        style={{
+          fontSize: "10px",
+          fontWeight: "700",
+          marginTop: "2px"
+        }}
+      >
+        {
+          status === "Present"
+            ? "P"
+            : status === "Absent"
+            ? "A"
+            : status === "Late"
+            ? "L"
+            : status === "Half Day"
+            ? "Half Day"
+            : status === "Holiday"
+            ? "Holiday👋"
+            : ""
         }
-      />
-
+      </div>
+    );
+  }}
+/>
       {/* CUSTOM CSS */}
 
       <style>
@@ -363,43 +403,47 @@ export default function AttendanceCalendar({
 
             background: rgba(255,255,255,0.08) !important;
           }
+/* STATUS COLORS */
 
-          /* STATUS COLORS */
+.attendance-present {
 
-          .attendance-present {
+  background: #16a34a !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border: 2px solid #22c55e !important;
+}
 
-            background: rgba(34,197,94,0.25) !important;
-            color: #4ade80 !important;
-            font-weight: bold;
-          }
+.attendance-absent {
 
-          .attendance-absent {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border: 2px solid #ef4444 !important;
+}
 
-            background: rgba(239,68,68,0.25) !important;
-            color: #f87171 !important;
-            font-weight: bold;
-          }
+.attendance-late {
 
-          .attendance-late {
+  background: #eab308 !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+  border: 2px solid #facc15 !important;
+}
 
-            background: rgba(234,179,8,0.25) !important;
-            color: #fde047 !important;
-            font-weight: bold;
-          }
+.attendance-halfday {
 
-          .attendance-halfday {
+  background: #9333ea !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border: 2px solid #a855f7 !important;
+}
 
-            background: rgba(168,85,247,0.25) !important;
-            color: #d8b4fe !important;
-            font-weight: bold;
-          }
+.attendance-holiday {
 
-          .attendance-holiday {
-
-            background: rgba(100,116,139,0.25) !important;
-            color: #cbd5e1 !important;
-            font-weight: bold;
-          }
+  background: #475569 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border: 2px solid #64748b !important;
+}
 
         `}
 

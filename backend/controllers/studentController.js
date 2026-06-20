@@ -1,6 +1,10 @@
 const bcrypt =
   require("bcryptjs");
 
+const School =
+  require("../models/School");
+
+
 const Parent =
   require("../models/Parent");
 
@@ -13,6 +17,11 @@ const Section =
 const Student =
   require("../models/Student");
 
+  const AcademicYear =
+require(
+  "../modules/academics/models/AcademicYear"
+);
+
 const XLSX =
   require("xlsx");
 
@@ -22,35 +31,39 @@ const fs =
 // =====================================
 // GENERATE STUDENT ID
 // =====================================
+const generateAdmissionNumber =
+  async (schoolId) => {
 
-const generateStudentId =
-  async () => {
-
-    let studentId = "";
-    let exists = true;
-
-    while (exists) {
-
-      const random =
-        Math.floor(
-          1000 +
-          Math.random() * 9000
-        );
-
-      studentId =
-        `SI${random}`;
-
-      const existing =
-        await Student.findOne({
-          studentId
-        });
-
-      exists = !!existing;
+  const school =
+  await School.findOneAndUpdate(
+    {
+      schoolCode: schoolId
+    },
+    {
+      $inc: {
+        lastAdmissionNumber: 1
+      }
+    },
+    {
+      new: true,
+      upsert: false
     }
+  );
 
-    return studentId;
-  };
+if (!school) {
+  throw new Error("School not found");
+}
 
+const serial =
+  Number(
+    school.lastAdmissionNumber || 0
+  );
+
+return (
+  school.schoolCode +
+  String(serial)
+    .padStart(6, "0")
+)};
 // =====================================
 // CLEAN PAYLOAD
 // =====================================
@@ -199,16 +212,24 @@ const validateStudent =
 
     // PARENT MOBILE
 
-    if (
-      payload.parentMobile &&
-      !/^[6-9]\d{9}$/.test(
-        payload.parentMobile
-      )
-    ) {
+//     if (
+//   !payload.parentMobile
+// ) {
 
-      errors.parentMobile =
-        "Enter valid parent mobile";
-    }
+//   errors.parentMobile =
+//     "Parent mobile is required";
+// }
+
+//     if (
+//       payload.parentMobile &&
+//       !/^[6-9]\d{9}$/.test(
+//         payload.parentMobile
+//       )
+//     ) {
+
+//       errors.parentMobile =
+//         "Enter valid parent mobile";
+//     }
 
     // EMAIL
 
@@ -477,12 +498,9 @@ const getStudents =
             Number(limit)
           )
 
-          .limit(
-            Math.min(
-              Number(limit),
-              100
-            )
-          );
+         .limit(
+  Number(limit)
+);
 
       return res.status(200).json({
 
@@ -785,27 +803,93 @@ const addStudent =
         }
       }
 
+      // =====================================
+// ACTIVE ACADEMIC YEAR
+// =====================================
+
+const activeYear =
+await AcademicYear.findOne({
+
+  schoolId:
+    req.user.schoolId,
+
+  isActive: true,
+
+  isDeleted: false
+});
+
+const section =
+await Section.findById(
+  payload.sectionId
+);
+
       // GENERATE STUDENT ID
 
-      const studentId =
-        await generateStudentId();
-
+      const admissionNumber =
+  await generateAdmissionNumber(
+    req.user.schoolId
+  );
       // CREATE STUDENT
 
-      const student =
-        await Student.create({
+     const student =
+await Student.create({
 
-          ...payload,
+  ...payload,
 
-          studentId,
+  studentId: admissionNumber,
+admissionNumber,
 
-          schoolId:
-            req.user.schoolId,
+  schoolId:
+    req.user.schoolId,
 
-          parentId:
-            parent?._id || null
-        });
+  parentId:
+    parent?._id || null,
 
+  currentAcademicYearId:
+    activeYear?._id || null,
+
+  currentAcademicYear:
+    activeYear?.name || "",
+
+  currentClassName:
+    section?.className || "",
+
+  currentSection:
+    section?.sectionName || "",
+
+  currentRollNumber:
+    payload.rollNumber || "",
+
+  academicHistory:
+
+    activeYear
+
+      ? [
+
+          {
+
+            academicYearId:
+              activeYear._id,
+
+            academicYear:
+              activeYear.name,
+
+            className:
+              section?.className || "",
+
+            section:
+              section?.sectionName || "",
+
+            rollNumber:
+payload.rollNumber || "",
+
+            joinedDate:
+              new Date()
+          }
+        ]
+
+      : []
+});
       // LINK CHILD
 
       if (parent) {
@@ -1149,6 +1233,22 @@ const updateStudent =
           await parent.save();
         }
       }
+      const section =
+await Section.findById(
+  payload.sectionId
+);
+
+if (section) {
+
+  payload.currentClassName =
+    section.className;
+
+  payload.currentSection =
+    section.sectionName;
+
+  payload.currentRollNumber =
+    payload.rollNumber || "";
+}
 
       // UPDATE STUDENT
 
@@ -1353,6 +1453,21 @@ const importStudents =
       let successCount = 0;
 
       let failedRows = [];
+
+      // =====================================
+// ACTIVE ACADEMIC YEAR
+// =====================================
+
+const activeYear =
+await AcademicYear.findOne({
+
+  schoolId:
+    req.user.schoolId,
+
+  isActive: true,
+
+  isDeleted: false
+});
 
       // LOOP
 
@@ -1586,74 +1701,113 @@ const importStudents =
 
             // SEND EMAIL
 
-            if (
-              cleanedPayload.parentEmail
-            ) {
+            // if (
+            //   cleanedPayload.parentEmail
+            // ) {
 
-              try {
+            //   try {
 
-                await sendEmail(
+            //     await sendEmail(
 
-                  cleanedPayload.parentEmail,
+            //       cleanedPayload.parentEmail,
 
-                  "Parent Portal Credentials",
+            //       "Parent Portal Credentials",
 
-                  `
-                  <h2>Parent Portal Login</h2>
+            //       `
+            //       <h2>Parent Portal Login</h2>
 
-                  <p>
-                    Your parent account has been created.
-                  </p>
+            //       <p>
+            //         Your parent account has been created.
+            //       </p>
 
-                  <p>
-                    <b>Email:</b>
-                    ${cleanedPayload.parentEmail}
-                  </p>
+            //       <p>
+            //         <b>Email:</b>
+            //         ${cleanedPayload.parentEmail}
+            //       </p>
 
-                  <p>
-                    <b>Password:</b>
-                    ${plainPassword}
-                  </p>
+            //       <p>
+            //         <b>Password:</b>
+            //         ${plainPassword}
+            //       </p>
 
-                  <p>
-                    Please change your password after login.
-                  </p>
-                  `
-                );
+            //       <p>
+            //         Please change your password after login.
+            //       </p>
+            //       `
+            //     );
 
-              } catch (emailError) {
+            //   } catch (emailError) {
 
-                console.log(
+            //     console.log(
 
-                  "IMPORT EMAIL ERROR:",
+            //       "IMPORT EMAIL ERROR:",
 
-                  emailError.message
-                );
-              }
-            }
+            //       emailError.message
+            //     );
+            //   }
+            // }
           }
 
           // GENERATE STUDENT ID
 
-          const studentId =
-            await generateStudentId();
-
+        const admissionNumber =
+  await generateAdmissionNumber(
+    req.user.schoolId
+  );
           // CREATE STUDENT
 
           const student =
-            await Student.create({
+  await Student.create({
 
-              ...cleanedPayload,
+    ...cleanedPayload,
 
-              studentId,
+    studentId: admissionNumber,
+admissionNumber,
+    schoolId:
+      req.user.schoolId,
 
-              schoolId:
-                req.user.schoolId,
+    parentId:
+      parent?._id || null,
 
-              parentId:
-                parent?._id || null
-            });
+    currentAcademicYearId:
+      activeYear?._id || null,
 
+    currentAcademicYear:
+      activeYear?.name || "",
+
+    currentClassName:
+      section?.className || "",
+
+    currentSection:
+      section?.sectionName || "",
+
+    academicHistory:
+
+      activeYear
+
+        ? [
+
+            {
+
+              academicYearId:
+                activeYear._id,
+
+              academicYear:
+                activeYear.name,
+
+              className:
+                section?.className || "",
+
+              section:
+                section?.sectionName || "",
+
+              joinedDate:
+                new Date()
+            }
+          ]
+
+        : []
+});
           // LINK CHILD
 
           if (parent) {

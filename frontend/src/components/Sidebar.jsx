@@ -47,6 +47,18 @@ const Sidebar = () => {
     },
 
     {
+      name: "Academic Years",
+      icon: "📅",
+      path: "/admin/academic-years"
+    },
+
+    {
+      name: "Promotion Management",
+      icon: "🚀",
+      path: "/admin/promotions"
+    },
+
+    {
       name: "Attendance",
       icon: "🗓️",
       path: "/admin/attendance"
@@ -59,9 +71,27 @@ const Sidebar = () => {
     },
 
     {
-      name: "Fees",
+      name: "Finance Dashboard",
       icon: "💰",
-      path: "/admin/fees"
+      path: "/admin/finance"
+    },
+
+    {
+      name: "Fee Structures",
+      icon: "📑",
+      path: "/admin/fee-structures"
+    },
+
+    {
+      name: "Collect Fees",
+      icon: "💵",
+      path: "/admin/collect-fees"
+    },
+
+    {
+      name: "Collection Reports",
+      icon: "📊",
+      path: "/admin/collection-reports"
     },
 
     {
@@ -71,23 +101,33 @@ const Sidebar = () => {
     },
 
     {
-      name: "Reports",
-      icon: "📊",
-      path: "/admin/reports"
+      name: "Marks Entry",
+      icon: "✍️",
+      path: "/admin/marks-entry"
     },
 
     {
-      name: "Settings",
-      icon: "⚙️",
-      path: "/admin/settings"
+      name: "Results",
+      icon: "🏆",
+      path: "/admin/results"
+    },
+
+    {
+      name: "Holidays",
+      icon: "🎉",
+      path: "/admin/holidays"
+    },
+
+    {
+      name: "Activity Logs",
+      icon: "📋",
+      path: "/admin/activity-logs"
     }
   ];
 
   return (
 
     <div className="sidebar">
-
-      {/* LOGO */}
 
       <div className="sidebar-logo">
 
@@ -96,8 +136,6 @@ const Sidebar = () => {
         </h2>
 
       </div>
-
-      {/* MENU */}
 
       <div className="sidebar-menu">
 

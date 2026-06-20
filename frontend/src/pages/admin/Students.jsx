@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import "./students.css";
@@ -43,7 +44,7 @@ export default function Students() {
   // ======================================================
   // STATES
   // ======================================================
-
+const navigate = useNavigate();
   const [students, setStudents] =
     useState([]);
 
@@ -68,6 +69,18 @@ export default function Students() {
   const [errors, setErrors] =
     useState({});
 
+const [page, setPage] =
+  useState(1);
+
+const [limit, setLimit] =
+  useState(10);
+const [totalPages, setTotalPages] =
+  useState(1);
+  const [totalStudents, setTotalStudents] =
+  useState(0);
+
+  const [showForm, setShowForm] =
+  useState(false);
 
   // ======================================================
   // INITIAL FORM
@@ -81,12 +94,6 @@ export default function Students() {
 
   dob: "",
 
-  age: "",
-
-  mobile: "",
-
-  email: "",
-
   fatherName: "",
 
   motherName: "",
@@ -94,6 +101,8 @@ export default function Students() {
   parentEmail: "",
 
   parentMobile: "",
+
+  alternateMobile: "",
 
   address: "",
 
@@ -104,6 +113,10 @@ export default function Students() {
   pincode: "",
 
   sectionId: "",
+
+  admissionDate: "",
+
+  status: "ACTIVE"
 };
 
   const [form, setForm] =
@@ -119,9 +132,11 @@ export default function Students() {
 
       try {
 
-        const res =
-          await API.get("/students");
-
+     const res =
+  await API.get(
+   `/students?page=${page}&limit=${limit}`
+  );
+  console.log(res.data);
 
         if (
           Array.isArray(
@@ -133,17 +148,21 @@ export default function Students() {
             res.data
           );
 
-        } else if (
-          Array.isArray(
-            res.data.students
-          )
-        ) {
+        } else if (Array.isArray(res.data.students)) {
 
-          setStudents(
-            res.data.students
-          );
+  setStudents(
+    res.data.students
+  );
 
-        } else {
+  setTotalPages(
+    res.data.totalPages || 0
+  );
+
+  setTotalStudents(
+  res.data.totalStudents || 0
+);
+
+}else {
 
           setStudents([]);
         }
@@ -207,16 +226,17 @@ export default function Students() {
   // ======================================================
   // INITIAL LOAD
   // ======================================================
+useEffect(() => {
 
-  useEffect(() => {
+  fetchStudents();
 
-    fetchStudents();
+}, [page, limit]);
 
-    fetchSections();
+useEffect(() => {
 
-  }, []);
+  fetchSections();
 
-
+}, []);
   // ======================================================
   // AGE CALCULATE
   // ======================================================
@@ -305,7 +325,7 @@ if (
 
       // MOBILE
 if (
-  ["mobile", "parentMobile"]
+  ["parentMobile", "alternateMobile"]
     .includes(name)
 ) {
 
@@ -368,7 +388,7 @@ if (
       // ONLY NUMBERS
 // ONLY NUMBERS
 if (
-  ["mobile", "parentMobile"]
+  ["parentMobile", "alternateMobile"]
     .includes(name)
 ) {
 
@@ -890,9 +910,12 @@ ${
 
     <div className="students-container">
 
-      <h2>
-        🎓 Students
-      </h2>
+     <div className="page-header">
+  <h1>Students Management</h1>
+  <p>
+    Manage admissions, student records and academic information
+  </p>
+</div>
 
 
       {/* SEARCH */}
@@ -927,6 +950,26 @@ ${
           Download Sample
 
         </button>
+
+        <button
+  className="add-student-btn"
+  onClick={() =>
+    navigate("/admin/students/add")
+  }
+>
+  + Add Student
+</button>
+
+       <button
+  className="add-student-btn"
+  onClick={() =>
+    setShowForm(!showForm)
+  }
+>
+  {showForm
+    ? "Close Quick Admission"
+    : "+ Quick Admission"}
+</button>
 
 
         <label className="import-label">
@@ -963,6 +1006,34 @@ ${
 
           <div className="import-result">
 
+            <div className="import-stats">
+
+  <div className="import-card">
+    <h3>
+      {
+        (importResult.successCount || 0) +
+        (importResult.failedCount || 0)
+      }
+    </h3>
+    <span>Total Rows</span>
+  </div>
+
+  <div className="import-card success">
+    <h3>
+      {importResult.successCount || 0}
+    </h3>
+    <span>Imported</span>
+  </div>
+
+  <div className="import-card failed">
+    <h3>
+      {importResult.failedCount || 0}
+    </h3>
+    <span>Failed</span>
+  </div>
+
+</div>
+
             <p>
 
               ✅ Success:
@@ -983,7 +1054,7 @@ ${
 
 </p>
 
-{
+{/* {
   importResult?.failedRows?.map(
     (f, i) => (
       <p key={i}>
@@ -991,17 +1062,68 @@ ${
       </p>
     )
   )
-}
+} */}
+<div
+  style={{
+    marginTop: "15px"
+  }}
+>
+
+  <details>
+
+    <summary
+      style={{
+        cursor: "pointer",
+        fontWeight: "600",
+        color: "#ef4444"
+      }}
+    >
+      View Failed Rows (
+      {importResult.failedCount}
+      )
+    </summary>
+
+    <div
+      style={{
+        maxHeight: "250px",
+        overflowY: "auto",
+        marginTop: "10px",
+        padding: "10px",
+        background: "#fff5f5",
+        borderRadius: "8px"
+      }}
+    >
+
+      {
+        importResult?.failedRows?.map(
+          (f, i) => (
+            <p
+              key={i}
+              style={{
+                margin: "4px 0",
+                fontSize: "13px"
+              }}
+            >
+              Row {f.row}: {f.reason}
+            </p>
+          )
+        )
+      }
+
+    </div>
+
+  </details>
+
+</div>
 
           </div>
         )
       }
-
-
       {/* FORM */}
 
-      <div className="form-wrapper">
+{showForm && (
 
+<div className="form-wrapper">
         <div className="form-grid">
 
 
@@ -1122,53 +1244,6 @@ ${
 
           </div>
 
-
-          {/* MOBILE */}
-
-          <div className="input-group">
-
-            <label>
-              Mobile
-            </label>
-
-            <input
-
-              name="mobile"
-
-              value={form.mobile}
-
-              onChange={
-                handleChange
-              }
-
-              maxLength={10}
-            />
-
-          </div>
-
-
-          {/* EMAIL */}
-
-          <div className="input-group">
-
-            <label>
-              Email
-            </label>
-
-            <input
-
-              name="email"
-
-              value={form.email}
-
-              onChange={
-                handleChange
-              }
-            />
-
-          </div>
-
-
           {/* FATHER */}
 
           <div className="input-group">
@@ -1256,6 +1331,25 @@ ${
 
 </div>
 
+<div className="input-group">
+
+  <label>
+    Alternate Mobile
+  </label>
+
+  <input
+
+    name="alternateMobile"
+
+    value={form.alternateMobile}
+
+    onChange={handleChange}
+
+    maxLength={10}
+  />
+
+</div>
+
           <div className="input-group">
 
             <label>
@@ -1334,6 +1428,145 @@ ${
 
         </div>
 
+        <div className="input-group">
+
+  <label>
+    Admission Date
+  </label>
+
+  <input
+
+    type="date"
+
+    name="admissionDate"
+
+    value={form.admissionDate}
+
+    onChange={handleChange}
+  />
+
+</div>
+
+<div className="input-group">
+
+  <label>
+    Status
+  </label>
+
+  <select
+
+    name="status"
+
+    value={form.status}
+
+    onChange={handleChange}
+  >
+
+    <option value="ACTIVE">
+      Active
+    </option>
+
+    <option value="INACTIVE">
+      Inactive
+    </option>
+
+    <option value="TC">
+      TC
+    </option>
+
+    <option value="ALUMNI">
+      Alumni
+    </option>
+
+  </select>
+
+</div>
+
+<div className="input-group">
+
+  <label>
+    Address
+  </label>
+
+  <input
+
+    name="address"
+
+    value={form.address}
+
+    onChange={handleChange}
+  />
+
+</div>
+
+<div className="input-group">
+
+  <label>
+    City
+  </label>
+
+  <input
+
+    name="city"
+
+    value={form.city}
+
+    onChange={handleChange}
+  />
+
+</div>
+
+<div className="input-group">
+
+  <label>
+    State
+  </label>
+
+  <select
+
+    name="state"
+
+    value={form.state}
+
+    onChange={handleChange}
+  >
+
+    <option value="">
+      Select State
+    </option>
+
+    {indianStates.map((state) => (
+      <option
+        key={state}
+        value={state}
+      >
+        {state}
+      </option>
+    ))}
+
+  </select>
+
+</div>
+
+<div className="input-group">
+
+  <label>
+    PIN Code
+  </label>
+
+  <input
+
+    name="pincode"
+
+    value={form.pincode}
+
+    onChange={handleChange}
+
+    maxLength={6}
+  />
+
+</div>
+
 
         {/* SUBMIT */}
 
@@ -1359,13 +1592,21 @@ ${
                 : "Add Student"
           }
 
-        </button>
+</button>
 
       </div>
 
+)}
+
+<div className="student-stats">
+
+<div className="stat-card">
+  Total Students: {totalStudents}
+</div>
+
+</div>
 
       {/* TABLE */}
-
       <div className="table-wrapper">
 
         <table className="students-table">
@@ -1446,34 +1687,35 @@ ${
 
                     <td>
 
-                      <button
+<button
+  className="edit-btn"
+  onClick={() =>
+    navigate(
+      `/admin/student/${s._id}`
+    )
+  }
+>
+  View
+</button>
 
-                        className="edit-btn"
+<button
+  className="edit-btn"
+ onClick={() => {
+  setShowForm(true);
+  handleEdit(s);
+}}>
+  Edit
+</button>
 
-                        onClick={() =>
-                          handleEdit(s)
-                        }
-                      >
+<button
+  className="delete-btn"
+  onClick={() =>
+    handleDelete(s._id)
+  }
+>
+  Delete
+</button>
 
-                        Edit
-
-                      </button>
-
-
-                      <button
-
-                        className="delete-btn"
-
-                        onClick={() =>
-                          handleDelete(
-                            s._id
-                          )
-                        }
-                      >
-
-                        Delete
-
-                      </button>
 
                     </td>
 
@@ -1485,9 +1727,34 @@ ${
           </tbody>
 
         </table>
+<div className="pagination">
 
+  <button
+    disabled={page === 1}
+    onClick={() =>
+      setPage(prev => prev - 1)
+    }
+  >
+    Previous
+  </button>
+
+  <span>
+    Page {page} of {totalPages}
+  </span>
+
+  <button
+    disabled={page >= totalPages}
+    onClick={() =>
+      setPage(prev => prev + 1)
+    }
+  >
+    Next →
+  </button>
+
+</div>
       </div>
 
     </div>
   );
 }
+

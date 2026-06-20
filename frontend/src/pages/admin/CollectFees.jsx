@@ -1,843 +1,1985 @@
-import {
-  useEffect,
+import React, {
+
   useState
+
 } from "react";
 
-import API from "../../services/api";
+import api from "../../services/api";
 
-export default function CollectFees() {
+import {
+
+  createPaymentOrder,
+
+  verifyPayment
+
+} from "../../services/paymentService";
+
+
+
+const CollectFees = () => {
 
   // ======================
   // STATES
   // ======================
 
-  const [students, setStudents] =
-  useState([]);
-  const [fees, setFees] =
-    useState([]);
+  const [
 
-  const [payments, setPayments] =
-    useState([]);
+    search,
 
-  const [loading, setLoading] =
-    useState(false);
+    setSearch
 
-  const [form, setForm] =
-    useState({
+  ] = useState("");
 
-      studentId: "",
 
-      feeStructureId: "",
 
-      totalAmount: 0,
+  const [
 
-      amountPaid: "",
+    loading,
 
-      pendingAmount: 0,
+    setLoading
 
-      paymentMode: "",
+  ] = useState(false);
 
-      paymentDate: "",
+
+
+  const [
+
+    data,
+
+    setData
+
+  ] = useState(null);
+
+
+
+  const [
+
+    selectedFee,
+
+    setSelectedFee
+
+  ] = useState(null);
+
+
+
+  const [
+
+    receiptData,
+
+    setReceiptData
+
+  ] = useState(null);
+
+
+
+  const [
+
+    paymentForm,
+
+    setPaymentForm
+
+  ] = useState({
+
+    amount: "",
+
+    discount: 0,
+
+    fine: 0,
+
+    paymentMethod:
+      "CASH",
+
+    remarks: ""
+  });
+
+
+
+
+  // ======================
+  // SEARCH STUDENT
+  // ======================
+
+  const handleSearch =
+  async () => {
+
+    try {
+
+      setLoading(true);
+
+
+
+      const response =
+        await api.get(
+
+          `/student-finance/search?search=${search}`
+        );
+
+
+
+      setData(
+        response.data
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        "Student not found"
+      );
+
+    } finally {
+
+      setLoading(false);
+    }
+  };
+
+
+
+
+  // ======================
+  // OPEN PAYMENT MODAL
+  // ======================
+
+  const openPaymentModal =
+  (item) => {
+
+    setSelectedFee(item);
+
+
+
+    setPaymentForm({
+
+     amount:
+  item.pendingAmount ||
+  item.amount,
+      discount: 0,
+
+      fine: 0,
+
+      paymentMethod:
+        "CASH",
 
       remarks: ""
     });
+  };
+
+
+
 
   // ======================
-  // FETCH DATA
+  // INPUT CHANGE
   // ======================
 
-  const fetchStudents =
-    async () => {
+  const handlePaymentInput =
+  (e) => {
 
-      try {
+    setPaymentForm({
 
-        const res =
-          await API.get(
-            "/students"
-          );
+      ...paymentForm,
 
-        setStudents(
-  res.data.students || []
-);
+      [e.target.name]:
+        e.target.value
+    });
+  };
 
-      } catch (err) {
 
-        console.error(err);
-      }
-    };
 
-  const fetchFees =
-    async () => {
-
-      try {
-
-        const res =
-          await API.get(
-            "/fees"
-          );
-
-        setFees(
-          res.data
-        );
-
-      } catch (err) {
-
-        console.error(err);
-      }
-    };
-
-  const fetchPayments =
-    async () => {
-
-      try {
-
-        const res =
-          await API.get(
-            "/fee-payments"
-          );
-
-        setPayments(
-          res.data
-        );
-
-      } catch (err) {
-
-        console.error(err);
-      }
-    };
-
-  useEffect(() => {
-
-    fetchStudents();
-
-    fetchFees();
-
-    fetchPayments();
-
-  }, []);
 
   // ======================
-  // HANDLE CHANGE
+  // COLLECT PAYMENT
   // ======================
 
-  const handleChange =
-    (e) => {
+  const collectPayment =
+  async () => {
 
-      const {
+    try {
 
-        name,
-
-        value
-
-      } = e.target;
-
-      // FEE SELECT
       if (
-        name ===
-        "feeStructureId"
+
+        !selectedFee ||
+
+        !paymentForm.amount
+
       ) {
 
-        const selectedFee =
-          fees.find(
-
-            (f) =>
-              f._id === value
-          );
-
-        if (selectedFee) {
-
-          setForm({
-
-            ...form,
-
-            feeStructureId:
-              value,
-
-            totalAmount:
-              selectedFee.amount,
-
-            pendingAmount:
-              selectedFee.amount
-          });
-
-          return;
-        }
+        return alert(
+          "Please enter amount"
+        );
       }
 
-      // PAID AMOUNT
+
+
+      // ======================
+      // FINAL AMOUNT
+      // ======================
+
+      const finalAmount =
+
+        Number(
+          paymentForm.amount
+        )
+
+        +
+
+        Number(
+          paymentForm.fine
+        )
+
+        -
+
+        Number(
+          paymentForm.discount
+        );
+if (
+
+  finalAmount >
+
+  selectedFee.pendingAmount +
+
+  Number(paymentForm.fine)
+
+) {
+
+  return alert(
+    "Amount exceeds pending fees"
+  );
+}
+
+
+     
+
+
+
+      // ======================
+      // CASH PAYMENT
+      // ======================
+
       if (
-        name ===
-        "amountPaid"
+
+        paymentForm.paymentMethod
+        === "CASH"
+
       ) {
 
-        const paid =
-          Number(value);
+        await api.post(
 
-        const pending =
-          form.totalAmount -
-          paid;
+          "/payments/collect-cash",
 
-        setForm({
+          {
 
-          ...form,
+            studentId:
+              data.student._id,
 
-          amountPaid:
-            value,
 
-          pendingAmount:
-            pending
+
+            studentFeeProfileId:
+              data.profile._id,
+
+
+
+            feeAssignmentIds: [
+
+              selectedFee._id
+            ],
+
+
+
+            amount:
+              finalAmount,
+
+
+
+            feeItems: [
+
+              {
+
+                title:
+                  selectedFee.title,
+
+                amount:
+                  finalAmount
+              }
+            ],
+
+
+
+            remarks:
+              paymentForm.remarks,
+
+
+
+            discount:
+              paymentForm.discount,
+
+
+
+            fine:
+              paymentForm.fine
+          }
+        );
+
+
+
+        // ======================
+        // RECEIPT
+        // ======================
+
+        setReceiptData({
+
+          student:
+            data.student,
+
+
+
+          fee:
+            selectedFee,
+
+
+
+          amount:
+            finalAmount,
+
+
+
+          paymentMethod:
+            "CASH",
+
+
+
+          remarks:
+            paymentForm.remarks,
+
+date:
+  new Date(),
+
+receiptNumber:
+
+  "RCPT-" +
+
+  Date.now()
+
+         
         });
+
+
+
+        alert(
+          "Cash payment collected successfully"
+        );
+
+
+
+        handleSearch();
+
+        setSelectedFee(null);
 
         return;
       }
 
-      setForm({
 
-        ...form,
 
-        [name]:
-          value
-      });
-    };
+      // ======================
+      // ONLINE PAYMENT
+      // ======================
 
-  // ======================
-  // SUBMIT
-  // ======================
+      const response =
 
-  const handleSubmit =
-    async (e) => {
+        await createPaymentOrder({
 
-      e.preventDefault();
+          studentId:
+            data.student._id,
 
-      try {
 
-        setLoading(true);
 
-        // VALIDATION
-        if (
+          studentFeeProfileId:
+            data.profile._id,
 
-          !form.studentId ||
 
-          !form.feeStructureId ||
 
-          !form.amountPaid ||
+          feeAssignmentIds: [
 
-          !form.paymentMode ||
+            selectedFee._id
+          ],
 
-          !form.paymentDate
-        ) {
 
-          alert(
-            "Please fill all required fields"
-          );
 
-          setLoading(false);
+          amount:
+            finalAmount,
 
-          return;
-        }
 
-        await API.post(
 
-          "/fee-payments",
+          paymentMethod:
+            "ONLINE",
 
-          form
-        );
 
-        alert(
-          "Fee collected successfully"
-        );
 
-        // RESET
-        setForm({
-
-          studentId: "",
-
-          feeStructureId: "",
-
-          totalAmount: 0,
-
-          amountPaid: "",
-
-          pendingAmount: 0,
-
-          paymentMode: "",
-
-          paymentDate: "",
-
-          remarks: ""
+          gateway:
+            "RAZORPAY"
         });
 
-        fetchPayments();
 
-      } catch (err) {
 
-        console.error(err);
 
-        alert(
+      const {
 
-          err?.response?.data?.msg ||
+        paymentOrder,
 
-          "Error collecting fee"
+        gatewayResponse
+
+      } = response;
+
+
+
+      // ======================
+      // RAZORPAY OPTIONS
+      // ======================
+
+      const options = {
+
+        key:
+          gatewayResponse
+          .publicKey,
+
+
+
+        amount:
+          gatewayResponse
+          .order.amount,
+
+
+
+        currency:
+          "INR",
+
+
+
+        name:
+          "Softzen ERP",
+
+
+
+        description:
+          "School Fee Collection",
+
+
+
+        order_id:
+          gatewayResponse
+          .order.id,
+
+
+
+        handler:
+        async function (
+          razorpayResponse
+        ) {
+
+          try {
+
+            const verifyResponse =
+
+              await verifyPayment({
+
+                paymentOrderId:
+                  paymentOrder._id,
+
+
+
+                razorpay_order_id:
+                  razorpayResponse
+                  .razorpay_order_id,
+
+
+
+                razorpay_payment_id:
+                  razorpayResponse
+                  .razorpay_payment_id,
+
+
+
+                razorpay_signature:
+                  razorpayResponse
+                  .razorpay_signature,
+
+
+
+                feeItems: [
+
+                  {
+
+                    title:
+                      selectedFee.title,
+
+                    amount:
+                      finalAmount
+                  }
+                ]
+              });
+
+
+
+
+            if (
+              verifyResponse.success
+            ) {
+
+              // ======================
+              // RECEIPT
+              // ======================
+
+              setReceiptData({
+
+                student:
+                  data.student,
+
+
+
+                fee:
+                  selectedFee,
+
+
+
+                amount:
+                  finalAmount,
+
+
+
+                paymentMethod:
+                  "ONLINE",
+
+
+
+                transactionId:
+                  razorpayResponse
+                  .razorpay_payment_id,
+
+
+
+                remarks:
+                  paymentForm.remarks,
+
+
+
+                
+                  date:
+  new Date(),
+
+receiptNumber:
+
+  "RCPT-" +
+
+  Date.now()
+              });
+
+
+
+              alert(
+                "Payment successful"
+              );
+
+
+
+              handleSearch();
+
+              setSelectedFee(null);
+
+            } else {
+
+              alert(
+                "Verification failed"
+              );
+            }
+
+          } catch (error) {
+
+            console.error(error);
+
+            alert(
+              "Payment failed"
+            );
+          }
+        },
+
+
+
+        theme: {
+
+          color:
+            "#2563eb"
+        }
+      };
+if (
+  !window.Razorpay
+) {
+
+  return alert(
+    "Razorpay SDK not loaded"
+  );
+}
+
+
+      const razorpay =
+        new window.Razorpay(
+          options
         );
 
-      } finally {
 
-        setLoading(false);
-      }
-    };
+
+      razorpay.open();
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        "Collection failed"
+      );
+    }
+  };
+
+
+
 
   // ======================
-  // DELETE
+  // PRINT RECEIPT
   // ======================
 
-  const handleDelete =
-    async (id) => {
+ const printReceipt =
+() => {
 
-      if (
-        !window.confirm(
-          "Delete payment?"
-        )
-      ) return;
+  const printContents =
 
-      try {
+    document.getElementById(
+      "receipt-print-area"
+    ).innerHTML;
 
-        await API.delete(
 
-          `/fee-payments/${id}`
-        );
 
-        alert(
-          "Payment deleted"
-        );
+  const win =
+    window.open(
+      "",
+      "",
+      "width=900,height=700"
+    );
 
-        fetchPayments();
 
-      } catch (err) {
 
-        console.error(err);
+  win.document.write(`
 
-        alert(
-          "Error deleting payment"
-        );
-      }
-    };
+    <html>
+
+      <head>
+
+        <title>
+          Fee Receipt
+        </title>
+
+      </head>
+
+      <body>
+
+        ${printContents}
+
+      </body>
+
+    </html>
+
+  `);
+
+
+
+  win.document.close();
+
+  win.print();
+};
+
+
+
+
+  // ======================
+  // UI
+  // ======================
 
   return (
 
-    <div>
+    <div
 
-      {/* HEADER */}
-      <div
-        style={{
-          marginBottom: "20px"
-        }}
-      >
+      style={{
 
-        <h1>
-          💳 Collect Fees
-        </h1>
+        padding: "20px",
 
-        <p
-          style={{
-            color: "#64748b"
-          }}
+        background:
+          "#f5f7fb",
+
+        minHeight:
+          "100vh"
+      }}
+    >
+
+      <h1>
+        Collect Fees
+      </h1>
+
+
+
+      {/* SEARCH */}
+
+      <div style={searchBox}>
+
+        <input
+
+          type="text"
+
+          onKeyDown={(e) => {
+
+  if (
+    e.key === "Enter"
+  ) {
+
+    handleSearch();
+  }
+}}
+
+          placeholder="Search by student name or admission number"
+
+          value={search}
+
+          onChange={(e) =>
+            setSearch(
+              e.target.value
+            )
+          }
+
+          style={inputStyle}
+        />
+
+
+
+        <button
+
+          onClick={handleSearch}
+           disabled={loading}
+
+          style={searchButton}
         >
-          Collect and manage
-          student fee payments
-        </p>
+
+          {
+
+            loading
+
+            ?
+
+            "Searching..."
+
+            :
+
+            "Search Student"
+          }
+
+        </button>
 
       </div>
 
-      {/* FORM */}
-      <div
-        style={{
 
-          background: "white",
 
-          padding: "25px",
+      {/* RESULT */}
 
-          borderRadius: "14px",
+      {
 
-          marginBottom: "25px",
+        data && (
 
-          boxShadow:
-            "0 2px 8px rgba(0,0,0,0.08)"
-        }}
-      >
+          <div style={resultBox}>
 
-        <h2>
-          Collect Payment
-        </h2>
+           <div
+  style={studentHeader}
+>
 
-        <form
-          onSubmit={handleSubmit}
-          style={{
+  <div>
 
-            display: "grid",
+    <h1
+      style={studentName}
+    >
 
-            gridTemplateColumns:
-              "repeat(auto-fit,minmax(220px,1fr))",
+      {
 
-            gap: "15px",
+        data.student
+        .fullName ||
 
-            marginTop: "20px"
-          }}
-        >
+        data.student.name
+      }
 
-          {/* STUDENT */}
-          <select
-            name="studentId"
+    </h1>
 
-            value={form.studentId}
+    <p>
+      Admission No:
+      {" "}
 
-            onChange={handleChange}
+      {
 
-            style={inputStyle}
-          >
+        data.student
+        .admissionNumber
+      }
+    </p>
 
-            <option value="">
-              Select Student
-            </option>
+    <p>
 
-            {Array.isArray(students) &&
-              students.map(
-                (student) => (
+      Class:
+      {" "}
 
-                  <option
-                    key={student._id}
+      {
+        data.profile
+        .className
+      }
 
-                    value={student._id}
-                  >
-                    {student.name}
-                    {" - "}
-                    {
-                      student.studentId
-                    }
-                  </option>
-                )
-              )
-            }
+      {" | "}
 
-          </select>
+      Section:
+      {" "}
 
-          {/* FEE */}
-          <select
-            name="feeStructureId"
+      {
+        data.profile
+        .section
+      }
 
-            value={
-              form.feeStructureId
-            }
+    </p>
 
-            onChange={handleChange}
+  </div>
 
-            style={inputStyle}
-          >
+  <div
+    style={pendingBadge}
+  >
 
-            <option value="">
-              Select Fee
-            </option>
+    <p>
+      Total Pending
+    </p>
 
-            {
-              fees.map(
-                (fee) => (
+    <h1>
 
-                  <option
-                    key={fee._id}
+      ₹{
 
-                    value={fee._id}
-                  >
-                    {fee.className}
-                    {" - "}
-                    {fee.feeType}
-                  </option>
-                )
-              )
-            }
+        data.profile
+        .totalPendingAmount
+      }
 
-          </select>
+    </h1>
 
-          {/* TOTAL */}
-          <input
-            type="text"
+  </div>
 
-            value={
-              form.totalAmount
-            }
+</div>
 
-            readOnly
 
-            placeholder="Total Amount"
-
-            style={inputStyle}
-          />
-
-          {/* PAID */}
-          <input
-            type="number"
-
-            name="amountPaid"
-
-            value={
-              form.amountPaid
-            }
-
-            onChange={handleChange}
-
-            placeholder="Amount Paid"
-
-            style={inputStyle}
-          />
-
-          {/* PENDING */}
-          <input
-            type="text"
-
-            value={
-              form.pendingAmount
-            }
-
-            readOnly
-
-            placeholder="Pending Amount"
-
-            style={inputStyle}
-          />
-
-          {/* PAYMENT MODE */}
-          <select
-            name="paymentMode"
-
-            value={
-              form.paymentMode
-            }
-
-            onChange={handleChange}
-
-            style={inputStyle}
-          >
-
-            <option value="">
-              Payment Mode
-            </option>
-
-            <option>
-              Cash
-            </option>
-
-            <option>
-              UPI
-            </option>
-
-            <option>
-              Card
-            </option>
-
-            <option>
-              Bank Transfer
-            </option>
-
-            <option>
-              Cheque
-            </option>
-
-          </select>
-
-          {/* DATE */}
-          <input
-            type="date"
-
-            name="paymentDate"
-
-            value={
-              form.paymentDate
-            }
-
-            onChange={handleChange}
-
-            style={inputStyle}
-          />
-
-          {/* REMARKS */}
-          <input
-            type="text"
-
-            name="remarks"
-
-            value={
-              form.remarks
-            }
-
-            onChange={handleChange}
-
-            placeholder="Remarks"
-
-            style={inputStyle}
-          />
-
-          {/* BUTTON */}
-          <button
-            type="submit"
-
-            disabled={loading}
-
-            style={buttonStyle}
-          >
-
-            {
-              loading
-                ? "Collecting..."
-                : "Collect Fee"
-            }
-
-          </button>
-
-        </form>
-      </div>
-
-      {/* TABLE */}
-      <div
-        style={{
-
-          background: "white",
-
-          borderRadius: "14px",
-
-          overflowX: "auto",
-
-          boxShadow:
-            "0 2px 8px rgba(0,0,0,0.08)"
-        }}
-      >
-
-        <table
-          style={{
-
-            width: "100%",
-
-            borderCollapse:
-              "collapse"
-          }}
-        >
-
-          <thead>
-
-            <tr
+            <hr
               style={{
-                background: "#0f172a",
-                color: "white"
+                margin:
+                  "20px 0"
               }}
+            />
+
+
+
+            <h2>
+              Fee Summary
+            </h2>
+
+
+
+            <div style={summaryGrid}>
+
+              <SummaryCard
+                title="Assigned"
+                amount={
+                  data.profile
+                  .totalAssignedAmount
+                }
+              />
+
+
+
+              <SummaryCard
+                title="Paid"
+                amount={
+                  data.profile
+                  .totalPaidAmount
+                }
+              />
+
+
+
+              <SummaryCard
+                title="Pending"
+                amount={
+                  data.profile
+                  .totalPendingAmount
+                }
+              />
+
+            </div>
+
+
+
+            <hr
+              style={{
+                margin:
+                  "20px 0"
+              }}
+            />
+
+
+
+            <h2>
+              Fee Items
+            </h2>
+
+
+
+            {
+
+              data.profile
+              .feeAssignments
+              ?.map(
+
+                (item) => (
+
+                  <div
+
+                    key={item._id}
+
+                    style={feeCard}
+                  >
+
+                    <div>
+
+                      <h3>
+                        {item.title}
+                      </h3>
+
+
+
+                      <p>
+                        Amount:
+                        ₹{item.amount}
+                      </p>
+
+
+
+                      <p>
+                        Paid:
+                        ₹{item.paidAmount || 0}
+                      </p>
+
+
+
+                      <p>
+
+  Due Date:
+
+  <strong>
+
+    {" "}
+
+    {
+
+      item.dueDate
+
+      ?
+
+      new Date(
+        item.dueDate
+      ).toLocaleDateString()
+
+      :
+
+      "N/A"
+    }
+
+  </strong>
+
+</p>
+<p>
+
+  Status:
+
+  <span
+
+    style={{
+
+      color:
+
+        item.pendingAmount <= 0
+
+        ?
+
+        "#16a34a"
+
+        :
+
+        new Date(
+          item.dueDate
+        ) < new Date()
+
+        ?
+
+        "#dc2626"
+
+        :
+
+        item.status ===
+        "PARTIAL"
+
+        ?
+
+        "#f59e0b"
+
+        :
+
+        "#2563eb",
+
+      background:
+
+        item.pendingAmount <= 0
+
+        ?
+
+        "#dcfce7"
+
+        :
+
+        new Date(
+          item.dueDate
+        ) < new Date()
+
+        ?
+
+        "#fee2e2"
+
+        :
+
+        "#dbeafe",
+
+      padding:
+        "4px 12px",
+
+      borderRadius:
+        "999px",
+
+      marginLeft: "10px",
+
+      fontWeight: "bold",
+
+      fontSize: "12px"
+    }}
+  >
+
+    {
+
+      item.pendingAmount <= 0
+
+      ?
+
+      "PAID"
+
+      :
+
+      new Date(
+        item.dueDate
+      ) < new Date()
+
+      ?
+
+      "OVERDUE"
+
+      :
+
+      item.status
+    }
+
+  </span>
+
+</p>
+                      
+
+                    </div>
+
+{(
+  item.pendingAmount ??
+  (
+    item.amount -
+    (item.paidAmount || 0)
+  )
+) > 0
+ && (
+
+    <button
+
+      onClick={() =>
+        openPaymentModal(item)
+      }
+
+      style={collectButton}
+    >
+
+      Collect Payment
+
+    </button>
+  )
+}
+
+                    
+
+                  </div>
+                )
+              )
+            }
+
+          </div>
+        )
+      }
+
+
+
+      {/* PAYMENT MODAL */}
+
+      {
+
+        selectedFee && (
+
+          <div
+            style={modalOverlay}
+          >
+
+            <div
+              style={modalBox}
             >
 
-              <th style={thStyle}>
-                Student
-              </th>
+              <h2>
+                Collect Payment
+              </h2>
 
-              <th style={thStyle}>
-                Fee Type
-              </th>
 
-              <th style={thStyle}>
-                Total
-              </th>
 
-              <th style={thStyle}>
-                Paid
-              </th>
+              <p>
+                {selectedFee.title}
+              </p>
 
-              <th style={thStyle}>
-                Pending
-              </th>
 
-              <th style={thStyle}>
-                Status
-              </th>
 
-              <th style={thStyle}>
-                Mode
-              </th>
+              <p>
+                Pending:
+                ₹{
+                  selectedFee.pendingAmount
+                }
+              </p>
 
-              <th style={thStyle}>
-                Receipt
-              </th>
 
-              <th style={thStyle}>
-                Action
-              </th>
 
-            </tr>
+              <input
 
-          </thead>
+                type="number"
 
-          <tbody>
+                name="amount"
 
-            {
-              payments.map(
-                (payment) => (
+                placeholder="Amount"
 
-                  <tr
-                    key={payment._id}
-                  >
+                value={
+                  paymentForm.amount
+                }
 
-                    <td style={tdStyle}>
-                      {
-                        payment
-                          ?.studentId
-                          ?.name
-                      }
-                    </td>
+                onChange={
+                  handlePaymentInput
+                }
 
-                    <td style={tdStyle}>
-                      {
-                        payment
-                          ?.feeStructureId
-                          ?.feeType
-                      }
-                    </td>
+                style={modalInput}
+              />
 
-                    <td style={tdStyle}>
-                      ₹
-                      {
-                        Number(
-                          payment.totalAmount
-                        ).toLocaleString(
-                          "en-IN"
-                        )
-                      }
-                    </td>
 
-                    <td style={tdStyle}>
-                      ₹
-                      {
-                        Number(
-                          payment.amountPaid
-                        ).toLocaleString(
-                          "en-IN"
-                        )
-                      }
-                    </td>
 
-                    <td style={tdStyle}>
-                      ₹
-                      {
-                        Number(
-                          payment.pendingAmount
-                        ).toLocaleString(
-                          "en-IN"
-                        )
-                      }
-                    </td>
+              <input
 
-                    <td style={tdStyle}>
-                      {
-                        payment
-                          .paymentStatus
-                      }
-                    </td>
+                type="number"
 
-                    <td style={tdStyle}>
-                      {
-                        payment
-                          .paymentMode
-                      }
-                    </td>
+                name="discount"
 
-                    <td style={tdStyle}>
-                      {
-                        payment
-                          .receiptNumber
-                      }
-                    </td>
+                placeholder="Discount"
 
-                    <td style={tdStyle}>
+                value={
+                  paymentForm.discount
+                }
 
-                      <button
+                onChange={
+                  handlePaymentInput
+                }
 
-                        onClick={() =>
-                          handleDelete(
-                            payment._id
-                          )
-                        }
+                style={modalInput}
+              />
 
-                        style={
-                          deleteBtn
-                        }
-                      >
-                        Delete
-                      </button>
 
-                    </td>
 
-                  </tr>
+              <input
+
+                type="number"
+
+                name="fine"
+
+                placeholder="Fine"
+
+                value={
+                  paymentForm.fine
+                }
+
+                onChange={
+                  handlePaymentInput
+                }
+
+                style={modalInput}
+              />
+
+
+
+              <select
+
+                name="paymentMethod"
+
+                value={
+                  paymentForm.paymentMethod
+                }
+
+                onChange={
+                  handlePaymentInput
+                }
+
+                style={modalInput}
+              >
+
+                <option value="CASH">
+                  Cash
+                </option>
+
+                <option value="ONLINE">
+                  Online
+                </option>
+
+              </select>
+
+
+
+              <textarea
+
+                name="remarks"
+
+                placeholder="Remarks"
+
+                value={
+                  paymentForm.remarks
+                }
+
+                onChange={
+                  handlePaymentInput
+                }
+
+                style={{
+
+                  ...modalInput,
+
+                  height: "80px"
+                }}
+              />
+
+
+
+              <button
+
+                onClick={collectPayment}
+
+                style={submitButton}
+              >
+
+                Submit Payment
+
+              </button>
+
+
+
+              <button
+
+                onClick={() =>
+                  setSelectedFee(null)
+                }
+
+                style={closeButton}
+              >
+
+                Close
+
+              </button>
+
+            </div>
+
+          </div>
+        )
+      }
+
+
+
+      {/* RECEIPT MODAL */}
+
+      {
+
+        receiptData && (
+
+          <div
+            style={receiptOverlay}
+          >
+<div
+
+  id="receipt-print-area"
+
+  style={receiptBox}
+>
+
+              <h1
+                style={{
+                  textAlign:
+                    "center"
+                }}
+              >
+
+                SOFTZEN ERP
+
+              </h1>
+
+
+
+              <h3
+                style={{
+                  textAlign:
+                    "center"
+                }}
+              >
+
+                Fee Payment Receipt
+
+              </h3>
+              <p
+
+  style={{
+
+    textAlign:
+      "center",
+
+    marginTop: "10px",
+
+    fontWeight:
+      "bold"
+  }}
+>
+
+  Receipt Number:
+
+  {
+
+    receiptData
+    .receiptNumber
+  }
+
+  
+
+</p>
+
+
+
+
+              <hr
+                style={{
+                  margin:
+                    "20px 0"
+                }}
+              />
+
+
+
+              <p>
+
+                <strong>
+                  Student Name:
+                </strong>
+
+                {" "}
+
+                {
+                  receiptData
+                  .student.name
+                }
+
+              </p>
+
+
+
+              <p>
+
+                <strong>
+                  Admission No:
+                </strong>
+
+                {" "}
+
+                {
+
+                  receiptData
+                  .student
+                  .admissionNumber
+                }
+
+              </p>
+
+
+
+              <p>
+
+                <strong>
+                  Fee Type:
+                </strong>
+
+                {" "}
+
+                {
+                  receiptData
+                  .fee.title
+                }
+
+              </p>
+
+
+
+              <p>
+
+                <strong>
+                  Amount Paid:
+                </strong>
+
+                {" "}
+
+                ₹{
+                  receiptData
+                  .amount
+                }
+
+              </p>
+
+
+
+              <p>
+
+                <strong>
+                  Payment Method:
+                </strong>
+
+                {" "}
+
+                {
+                  receiptData
+                  .paymentMethod
+                }
+
+              </p>
+
+
+
+              {
+
+                receiptData
+                .transactionId && (
+
+                  <p>
+
+                    <strong>
+                      Transaction ID:
+                    </strong>
+
+                    {" "}
+
+                    {
+
+                      receiptData
+                      .transactionId
+                    }
+
+                  </p>
                 )
-              )
-            }
+              }
 
-          </tbody>
 
-        </table>
-      </div>
+
+              {
+
+                receiptData
+                .remarks && (
+
+                  <p>
+
+                    <strong>
+                      Remarks:
+                    </strong>
+
+                    {" "}
+
+                    {
+                      receiptData
+                      .remarks
+                    }
+
+                  </p>
+                )
+              }
+
+
+
+              <p>
+
+                <strong>
+                  Date:
+                </strong>
+
+                {" "}
+
+                {
+
+                  new Date(
+                    receiptData.date
+                  )
+                  .toLocaleString()
+                }
+
+              </p>
+
+
+
+              <hr
+                style={{
+                  margin:
+                    "20px 0"
+                }}
+              />
+
+
+
+              <p
+                style={{
+                  textAlign:
+                    "center"
+                }}
+              >
+
+                This is a computer generated receipt.
+
+              </p>
+
+
+
+              <div
+                style={receiptActions}
+              >
+
+                <button
+
+                  onClick={
+                    printReceipt
+                  }
+
+                  style={
+                    printButton
+                  }
+                >
+
+                  Print
+
+                </button>
+
+
+
+                <button
+
+                  onClick={() =>
+                    setReceiptData(
+                      null
+                    )
+                  }
+
+                  style={
+                    closeReceiptButton
+                  }
+                >
+
+                  Close
+
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+        )
+      }
+
     </div>
   );
-}
+};
+
+
+
+// ======================
+// SUMMARY CARD
+// ======================
+
+const SummaryCard = ({
+
+  title,
+
+  amount
+
+}) => {
+
+  return (
+
+    <div
+      style={summaryCard}
+    >
+
+      <h4>
+        {title}
+      </h4>
+
+
+
+      <h2>
+        ₹{amount}
+      </h2>
+
+    </div>
+  );
+};
+
+
 
 // ======================
 // STYLES
 // ======================
 
+const searchBox = {
+
+  background: "#fff",
+
+  padding: "20px",
+
+  borderRadius: "12px",
+
+  marginTop: "20px"
+};
+
+const resultBox = {
+
+  background: "#fff",
+
+  padding: "20px",
+
+  borderRadius: "12px",
+
+  marginTop: "30px"
+};
+
 const inputStyle = {
+
+  width: "100%",
 
   padding: "12px",
 
   borderRadius: "8px",
 
-  border: "1px solid #cbd5e1",
-
-  fontSize: "14px"
+  border: "1px solid #ddd"
 };
 
-const buttonStyle = {
+const searchButton = {
 
   background: "#2563eb",
 
-  color: "white",
+  color: "#fff",
 
   border: "none",
 
+  padding: "12px 20px",
+
+  borderRadius: "8px",
+
+  marginTop: "15px",
+
+  cursor: "pointer"
+};
+
+const summaryGrid = {
+
+  display: "grid",
+
+  gridTemplateColumns:
+    "repeat(auto-fit,minmax(200px,1fr))",
+
+  gap: "15px"
+};
+
+const summaryCard = {
+
+  background: "#f8fafc",
+
+  padding: "20px",
+
+  borderRadius: "10px"
+};
+
+const feeCard = {
+
+  border: "1px solid #eee",
+
+  padding: "15px",
+
+  borderRadius: "10px",
+
+  marginTop: "15px",
+
+  display: "flex",
+
+  justifyContent:
+    "space-between",
+
+  alignItems: "center"
+};
+
+const collectButton = {
+
+  background: "#16a34a",
+
+  color: "#fff",
+
+  border: "none",
+
+  padding: "12px 16px",
+
+  borderRadius: "8px",
+
+  cursor: "pointer"
+};
+
+const modalOverlay = {
+
+  position: "fixed",
+
+  top: 0,
+
+  left: 0,
+
+  width: "100%",
+
+  height: "100%",
+
+  background:
+    "rgba(0,0,0,0.5)",
+
+  display: "flex",
+
+  alignItems: "center",
+
+  justifyContent:
+    "center",
+
+  zIndex: 999
+};
+
+const modalBox = {
+
+  background: "#fff",
+
+  padding: "25px",
+
+  borderRadius: "12px",
+
+  width: "400px"
+};
+
+const modalInput = {
+
+  width: "100%",
+
   padding: "12px",
+
+  borderRadius: "8px",
+
+  border: "1px solid #ddd",
+
+  marginTop: "12px"
+};
+
+const submitButton = {
+
+  background: "#2563eb",
+
+  color: "#fff",
+
+  border: "none",
+
+  padding: "12px 18px",
 
   borderRadius: "8px",
 
   cursor: "pointer",
 
-  fontWeight: "600"
+  marginTop: "15px"
 };
 
-const deleteBtn = {
+const closeButton = {
 
   background: "#ef4444",
 
-  color: "white",
+  color: "#fff",
 
   border: "none",
 
-  padding: "8px 14px",
+  padding: "12px 18px",
 
-  borderRadius: "6px",
+  borderRadius: "8px",
+
+  cursor: "pointer",
+
+  marginTop: "15px",
+
+  marginLeft: "10px"
+};
+
+const receiptOverlay = {
+
+  position: "fixed",
+
+  top: 0,
+
+  left: 0,
+
+  width: "100%",
+
+  height: "100%",
+
+  background:
+    "rgba(0,0,0,0.5)",
+
+  display: "flex",
+
+  alignItems: "center",
+
+  justifyContent:
+    "center",
+
+  zIndex: 9999
+};
+
+const receiptBox = {
+
+  background: "#fff",
+
+  width: "500px",
+
+  padding: "30px",
+
+  borderRadius: "12px",
+
+  boxShadow:
+    "0 10px 30px rgba(0,0,0,0.2)"
+};
+
+const receiptActions = {
+
+  display: "flex",
+
+  gap: "10px",
+
+  marginTop: "20px",
+
+  justifyContent:
+    "center"
+};
+
+const studentHeader = {
+
+  display: "flex",
+
+  justifyContent:
+    "space-between",
+
+  alignItems: "center",
+
+  flexWrap: "wrap",
+
+  gap: "20px",
+
+  marginBottom: "25px"
+};
+
+const studentName = {
+
+  fontSize: "32px",
+
+  fontWeight: "700",
+
+  color: "#0f172a",
+
+  marginBottom: "10px"
+};
+
+const pendingBadge = {
+
+  background:
+    "#fee2e2",
+
+  color: "#dc2626",
+
+  padding: "20px",
+
+  borderRadius: "18px",
+
+  minWidth: "220px",
+
+  textAlign: "center",
+
+  fontWeight: "bold",
+
+  boxShadow:
+    "0 4px 10px rgba(220,38,38,0.15)"
+};
+
+const printButton = {
+
+  background: "#2563eb",
+
+  color: "#fff",
+
+  border: "none",
+
+  padding: "12px 20px",
+
+  borderRadius: "8px",
 
   cursor: "pointer"
 };
 
-const thStyle = {
+const closeReceiptButton = {
 
-  padding: "14px",
+  background: "#ef4444",
 
-  textAlign: "left"
+  color: "#fff",
+
+  border: "none",
+
+  padding: "12px 20px",
+
+  borderRadius: "8px",
+
+  cursor: "pointer"
 };
 
-const tdStyle = {
-
-  padding: "14px",
-
-  borderBottom:
-    "1px solid #e2e8f0"
-};
+export default CollectFees;

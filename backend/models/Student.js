@@ -40,6 +40,120 @@ const studentSchema =
         uppercase: true
       },
 
+     admissionNumber: {
+  type: String,
+  required: true,
+  trim: true,
+  uppercase: true,
+  
+},
+
+academicYear: {
+  type: String,
+  default: ""
+},
+
+previousBoard: {
+  type: String,
+  default: ""
+},
+
+fatherAadhaar: {
+  type: String,
+  default: ""
+},
+
+motherAadhaar: {
+  type: String,
+  default: ""
+},
+
+guardianOccupation: {
+  type: String,
+  default: ""
+},
+
+
+medium: {
+  type: String,
+  default: "English"
+},
+
+subjectsStudied: {
+  type: [String],
+  default: []
+},
+
+leavingDate: {
+  type: String,
+  default: ""
+},
+
+guardianAddress: {
+  type: String,
+  default: ""
+},
+
+currentAddress: {
+  type: String,
+  default: ""
+},
+
+permanentAddress: {
+  type: String,
+  default: ""
+},
+
+sameAsCurrentAddress: {
+  type: Boolean,
+  default: true
+},
+
+doctorName: {
+  type: String,
+  default: ""
+},
+
+doctorContact: {
+  type: String,
+  default: ""
+},
+
+nearbyHospital: {
+  type: String,
+  default: ""
+},
+
+feeCategory: {
+  type: String,
+  default: ""
+},
+
+scholarship: {
+  type: String,
+  default: ""
+},
+
+discount: {
+  type: Number,
+  default: 0
+},
+
+      // ======================================================
+      // FAMILY / SIBLING SYSTEM
+      // ======================================================
+
+      familyId: {
+
+        type: String,
+
+        trim: true,
+
+        default: "",
+
+        index: true
+      },
+
       // ======================================================
       // BASIC DETAILS
       // ======================================================
@@ -105,8 +219,153 @@ const studentSchema =
         default: 0
       },
 
+      bloodGroup: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      religion: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      category: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      aadhaarNumber: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      caste: {
+
+  type: String,
+
+  trim: true,
+
+  default: ""
+},
+
+      nationality: {
+
+        type: String,
+
+        trim: true,
+
+        default: "Indian"
+      },
+
+      previousSchool: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      motherTongue: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      penNumber: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      emisNumber: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
       // ======================================================
-      // ACADEMIC DETAILS
+      // CURRENT ACADEMIC STATE
+      // ======================================================
+
+      currentAcademicYearId: {
+
+        type:
+          mongoose.Schema.Types.ObjectId,
+
+        ref:
+          "AcademicYear",
+
+        default: null,
+
+        index: true
+      },
+
+      currentAcademicYear: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      currentClassName: {
+
+        type: String,
+
+        trim: true,
+
+        default: "",
+
+        index: true
+      },
+
+      currentSection: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      currentRollNumber: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      // ======================================================
+      // OLD COMPATIBILITY FIELDS
       // ======================================================
 
       rollNumber: {
@@ -127,22 +386,6 @@ const studentSchema =
         default: ""
       },
 
-      admissionStatus: {
-
-        type: String,
-
-        enum: [
-
-          "Active",
-
-          "Inactive",
-
-          "Pending"
-        ],
-
-        default: "Active"
-      },
-
       sectionId: {
 
         type:
@@ -151,6 +394,70 @@ const studentSchema =
         ref: "Section",
 
         required: true
+      },
+
+      // ======================================================
+      // ACADEMIC META
+      // ======================================================
+
+      boardType: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      stream: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      house: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      // ======================================================
+      // STUDENT STATUS
+      // ======================================================
+
+      studentStatus: {
+
+        type: String,
+
+        enum: [
+
+          "ACTIVE",
+
+          "INACTIVE",
+
+          "LEFT",
+
+          "PASSED_OUT",
+
+          "ALUMNI",
+
+          "SUSPENDED",
+
+          "TC",
+
+          "REJOINED"
+        ],
+
+        default:
+          "ACTIVE",
+
+        index: true
       },
 
       // ======================================================
@@ -200,6 +507,33 @@ const studentSchema =
         default: ""
       },
 
+      emergencyContactName: {
+
+  type: String,
+
+  trim: true,
+
+  default: ""
+},
+
+emergencyContactNumber: {
+
+  type: String,
+
+  trim: true,
+
+  default: ""
+},
+
+emergencyRelation: {
+
+  type: String,
+
+  trim: true,
+
+  default: ""
+},
+
       // ======================================================
       // PARENT DETAILS
       // ======================================================
@@ -213,7 +547,43 @@ const studentSchema =
         default: ""
       },
 
+      fatherOccupation: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      fatherQualification: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
       motherName: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      motherOccupation: {
+
+        type: String,
+
+        trim: true,
+
+        default: ""
+      },
+
+      motherQualification: {
 
         type: String,
 
@@ -240,6 +610,15 @@ const studentSchema =
         default: ""
       },
 
+      alternateMobile: {
+
+  type: String,
+
+  trim: true,
+
+  default: ""
+},
+
       parentEmail: {
 
         type: String,
@@ -250,6 +629,42 @@ const studentSchema =
 
         default: ""
       },
+
+      fatherEmail: {
+  type: String,
+  trim: true,
+  lowercase: true,
+  default: ""
+},
+
+motherMobile: {
+  type: String,
+  trim: true,
+  default: ""
+},
+
+annualIncome: {
+  type: Number,
+  default: 0
+},
+
+guardianName: {
+  type: String,
+  trim: true,
+  default: ""
+},
+
+guardianRelation: {
+  type: String,
+  trim: true,
+  default: ""
+},
+
+guardianMobile: {
+  type: String,
+  trim: true,
+  default: ""
+},
 
       // ======================================================
       // ADDRESS
@@ -280,6 +695,15 @@ const studentSchema =
         default: ""
       },
 
+      district: {
+
+  type: String,
+
+  trim: true,
+
+  default: ""
+},
+
       pincode: {
 
         type: String,
@@ -289,53 +713,13 @@ const studentSchema =
         default: ""
       },
 
-      // ======================================================
-      // PERSONAL DETAILS
-      // ======================================================
-
-      bloodGroup: {
+      country: {
 
         type: String,
 
         trim: true,
 
-        default: ""
-      },
-
-      religion: {
-
-        type: String,
-
-        trim: true,
-
-        default: ""
-      },
-
-      category: {
-
-        type: String,
-
-        trim: true,
-
-        default: ""
-      },
-
-      aadhaarNumber: {
-
-        type: String,
-
-        trim: true,
-
-        default: ""
-      },
-
-      nationality: {
-
-        type: String,
-
-        trim: true,
-
-        default: "Indian"
+        default: "India"
       },
 
       // ======================================================
@@ -350,6 +734,13 @@ const studentSchema =
       },
 
       allergies: {
+
+        type: String,
+
+        default: ""
+      },
+
+      disability: {
 
         type: String,
 
@@ -411,6 +802,31 @@ const studentSchema =
       },
 
       // ======================================================
+      // MARKETING / CRM
+      // ======================================================
+
+      leadSource: {
+
+        type: String,
+
+        default: ""
+      },
+
+      scholarshipType: {
+
+        type: String,
+
+        default: ""
+      },
+
+      concessionType: {
+
+        type: String,
+
+        default: ""
+      },
+
+      // ======================================================
       // MEDIA
       // ======================================================
 
@@ -434,6 +850,118 @@ const studentSchema =
 
         default: []
       },
+
+      // ======================================================
+      // ACADEMIC HISTORY
+      // ======================================================
+
+      academicHistory: [
+
+        {
+
+          academicYearId: {
+
+            type:
+              mongoose.Schema.Types.ObjectId,
+
+            ref:
+              "AcademicYear"
+          },
+
+          academicYear: {
+
+            type: String,
+
+            default: ""
+          },
+
+          className: {
+
+            type: String,
+
+            default: ""
+          },
+
+          section: {
+
+            type: String,
+
+            default: ""
+          },
+
+          rollNumber: {
+
+            type: String,
+
+            default: ""
+          },
+
+          joinedDate: {
+
+            type: Date,
+
+            default: null
+          },
+
+          resultStatus: {
+
+            type: String,
+
+            enum: [
+
+              "PROMOTED",
+
+              "PASSED",
+
+              "FAILED",
+
+              "DETAINED",
+
+              "LEFT",
+
+              "TC"
+            ],
+
+            default:
+              "PASSED"
+          },
+
+          promotedTo: {
+
+            type: String,
+
+            default: ""
+          },
+
+          promotedDate: {
+
+            type: Date,
+
+            default: null
+          },
+
+          attendancePercentage: {
+
+            type: Number,
+
+            default: 0
+          },
+
+          finalPercentage: {
+
+            type: Number,
+
+            default: 0
+          },
+
+          remarks: {
+
+            type: String,
+
+            default: ""
+          }
+        }
+      ],
 
       // ======================================================
       // STATUS FLAGS
@@ -515,7 +1043,46 @@ studentSchema.index({
 
   schoolId: 1,
 
-  admissionStatus: 1
+  familyId: 1
+});
+
+studentSchema.index({
+
+  schoolId: 1,
+
+  currentAcademicYear: 1
+});
+
+studentSchema.index({
+
+  schoolId: 1,
+
+  currentClassName: 1
+});
+
+studentSchema.index({
+
+  schoolId: 1,
+
+  studentStatus: 1
+});
+
+studentSchema.index(
+  {
+    schoolId: 1,
+    admissionNumber: 1
+  },
+  {
+    unique: true
+  }
+);
+
+studentSchema.index({
+
+  schoolId: 1,
+
+  createdAt: -1
+
 });
 
 // ======================================================

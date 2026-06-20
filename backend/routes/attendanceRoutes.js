@@ -7,7 +7,6 @@ const router =
 // ======================================================
 // CONTROLLERS
 // ======================================================
-
 const {
 
   markAttendance,
@@ -16,7 +15,15 @@ const {
 
   getMonthlyAttendance,
 
-  checkAttendanceExists
+  checkAttendanceExists,
+
+  getAttendanceDashboard,
+
+  getStudentAttendanceHistory,
+
+  getStudentAttendanceByDate,
+
+  getAttendanceStatusBulk
 
 } = require(
   "../controllers/attendanceController"
@@ -151,6 +158,82 @@ router.get(
   ),
 
   getMonthlyAttendance
+);
+
+router.get(
+
+  "/history",
+
+  authMiddleware,
+
+  authorizeRoles(
+
+    "teacher",
+
+    "admin",
+
+    "parent",
+
+    "student",
+
+    "super_admin"
+  ),
+
+  getStudentAttendanceHistory
+);
+
+router.get(
+
+  "/date-status",
+
+  authMiddleware,
+
+  authorizeRoles(
+
+    "teacher",
+
+    "admin",
+
+    "super_admin"
+  ),
+
+
+
+  getStudentAttendanceByDate
+);
+
+router.post(
+
+  "/bulk-status",
+
+  authMiddleware,
+
+  authorizeRoles(
+
+    "teacher",
+
+    "admin",
+
+    "super_admin"
+  ),
+
+  getAttendanceStatusBulk
+);
+
+router.get(
+
+  "/dashboard",
+
+  authMiddleware,
+
+  authorizeRoles(
+
+    "admin",
+
+    "super_admin"
+  ),
+
+  getAttendanceDashboard
 );
 
 // ======================================================
